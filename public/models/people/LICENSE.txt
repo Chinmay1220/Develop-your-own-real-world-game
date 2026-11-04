@@ -1,0 +1,9 @@
+These people and animations are converted from the Microsoft Rocketbox avatar library
+(https://github.com/microsoft/Microsoft-Rocketbox), released by Microsoft under the MIT License.
+Textures were shrunk and the files repacked as GLB for the web; nothing else was changed.
+
+MIT License, Copyright (c) Microsoft Corporation.
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
+documentation files, to deal in the Software without restriction, including the rights to use, copy, modify, merge,
+publish, distribute, sublicense, and/or sell copies, subject to including this notice. The software is provided
+"as is", without warranty of any kind.

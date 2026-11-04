@@ -43,6 +43,13 @@ for (const [name, { size }] of Object.entries(modelInfo)) {
 }
 const modelList = [...packs].map(([pack, files]) => `  "${pack}/…": ${files.join(", ")}`).join("\n");
 
+// Real people from Microsoft Rocketbox (public/models/people/index.json, from npm run people).
+const PEOPLE_INDEX = join(ROOT, "public", "models", "people", "index.json");
+const realPeople = existsSync(PEOPLE_INDEX) ? (JSON.parse(readFileSync(PEOPLE_INDEX, "utf8")) as { people: Record<string, { description: string; height: number }> }).people : {};
+const peopleList = Object.entries(realPeople)
+  .map(([id, person]) => `${id} (${person.description}, ${person.height} m)`)
+  .join(", ");
+
 // Poly Haven's real scanned models, surfaces and skies (public/models/polyhaven.json, from npm run polyhaven).
 interface PolyHaven {
   models: Record<string, { size: number[]; polygons: number; categories: string[] }>;
@@ -128,7 +135,8 @@ ${scannedModels || "  (none installed)"}
 - To paint a model, change its materials: model.traverse((part) => { if (part.isMesh) ... }). Make clones of the materials first.
 - kit.remove(object) takes something out of the game.
 Characters:
-- kit.character(look, { at, color: "#rrggbb", scale, turn }): an animated person or creature. Looks: ${looks}.
+- kit.character(look, { at, color: "#rrggbb", scale, turn }): an animated person or creature.
+${peopleList ? `  - Real people, realistic and real size: use them for every human, unless the game is a cartoon or needs a robot, ghost or creature. ${peopleList}.\n  - They show a moment after the game starts (they load from the server), and also have the animations "crouch", "look" (looking around), "cheer" and "talk". c.speeds.walk and c.speeds.run (metres per second) match their feet: move them at those speeds, or call c.play("run", speed / c.speeds.run) to fit a faster run.\n  - Other looks, stylised: ${looks}.` : `  - Looks: ${looks}.`}
 - It returns c: move and turn c.root (a THREE.Group) yourself, and call c.play("idle" | "walk" | "run") to match. c.face(x, z) turns it toward a point; c.height is its height.
 - A character faces +z when its root.rotation.y is 0, so moving forward is position += (sin(rotation.y), 0, cos(rotation.y)) × speed × dt.
 Camera:

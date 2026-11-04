@@ -135,6 +135,10 @@ export class Browser {
     await Promise.race([this.send("Browser.close"), sleep(1500)]); // Edge may close before it answers
     this.#edge.kill();
     await sleep(300);
-    rmSync(this.#profile, { recursive: true, force: true, maxRetries: 3 });
+    try {
+      rmSync(this.#profile, { recursive: true, force: true, maxRetries: 8, retryDelay: 250 });
+    } catch {
+      // Windows can keep Edge's files locked a moment longer; a leftover temporary folder does no harm.
+    }
   }
 }

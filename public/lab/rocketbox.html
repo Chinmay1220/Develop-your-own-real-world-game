@@ -1,0 +1,218 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Rocketbox converter</title>
+  <style>html,body{margin:0;height:100%;overflow:hidden;background:#20242c}canvas{display:block}#log{position:fixed;left:8px;top:8px;color:#cfe;font:12px monospace;white-space:pre-wrap;max-width:96%;max-height:40%;overflow:hidden;text-shadow:0 1px 2px #000}</style>
+  <script type="importmap">{ "imports": { "three": "https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js", "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/" } }</script>
+</head>
+<body>
+  <pre id="log"></pre>
+  <script type="module">
+    // Converts Microsoft Rocketbox people (MIT, github.com/microsoft/Microsoft-Rocketbox) for games.
+    // ?mode=avatar&path=Avatars/Professions/Police_Male_01&textures=a.tga,b.tga
+    //   one person: their body with 1024 px JPEG textures (bump maps at 512), standing, facing +z, in metres.
+    // ?mode=animations&gender=m&path=<a person of that gender>&textures=…
+    //   the shared animations (idle, walk, run…) for every person of that gender: joint rotations, plus the
+    //   hips' height, with the forward travel taken out (the game moves the person; the speed is reported).
+    // It previews the result, then sets window.result (a GLB as base64) and window.report. Used by src/tools/people.ts.
+    import * as THREE from "three";
+    import { FBXLoader } from "three/addons/loaders/FBXLoader.js";
+    import { TGALoader } from "three/addons/loaders/TGALoader.js";
+    import { GLTFExporter } from "three/addons/exporters/GLTFExporter.js";
+
+    const RAW = "https://raw.githubusercontent.com/microsoft/Microsoft-Rocketbox/master/Assets/";
+    const ROOT_BONE = "Bip01";
+    const params = new URLSearchParams(location.search);
+    const mode = params.get("mode") ?? "avatar";
+    const path = params.get("path");
+    const name = path.split("/").pop();
+    const textures = (params.get("textures") ?? "").split(",").filter(Boolean);
+    const gender = params.get("gender") ?? (/female/i.test(name) ? "f" : "m");
+    const size = Number(params.get("size") ?? 1024);
+    const logBox = document.getElementById("log");
+    const log = (...parts) => {
+      const line = parts.map((part) => (typeof part === "string" ? part : JSON.stringify(part))).join(" ");
+      console.log(`LOG ${line}`);
+      logBox.textContent += `${line}\n`;
+    };
+    // Animations kept for every person: [name, file in Animations/, does it travel (walk, run)].
+    const ANIMATIONS = [
+      ["idle", `all_animations_max_motextr_static/${gender}_idle_neutral_01.max.fbx`],
+      ["walk", `all_animations_max_motextr_xy/${gender}_walk_neutral_01.max.fbx`],
+      ["run", `all_animations_max_motextr_xy/${gender}_run_neutral_01.max.fbx`],
+      ["crouch", `all_animations_max_motextr_static/${gender}_crouch_idle.max.fbx`],
+      ["look", `all_animations_max_motextr_static/${gender}_idle_look_around_01.max.fbx`],
+      ["cheer", `all_animations_max_motextr_static/${gender}_cheer_01.max.fbx`],
+      ["talk", `all_animations_max_motextr_static/${gender}_gestic_listen_accept_01.max.fbx`],
+    ];
+
+    try {
+      // Textures: the FBX names them by an old file path; find each by its file name in the avatar's Textures folder.
+      const known = new Map(textures.map((file) => [file.toLowerCase().replace(/\.[a-z]+$/, ""), file]));
+      const skipped = new Set();
+      const manager = new THREE.LoadingManager();
+      manager.addHandler(/\.tga$/i, new TGALoader(manager));
+      const blank = "data:image/gif;base64,R0lGODlhAQABAAAAACw=";
+      manager.setURLModifier((url) => {
+        if (/\.fbx$/i.test(url)) return url;
+        const stem = decodeURIComponent(url).split(/[\\/]/).pop().toLowerCase().replace(/\.[a-z]+$/, "");
+        const file = known.get(stem);
+        if (!file || /specular/.test(stem) || mode === "animations") return skipped.add(stem), blank; // not needed
+        return `${RAW}${path}/Textures/${file}`;
+      });
+      const loader = new FBXLoader(manager);
+      const started = performance.now();
+      const everything = new Promise((done) => (manager.onLoad = done)); // the model, then its textures
+      const avatar = await loader.loadAsync(`${RAW}${path}/Export/${name}.fbx`);
+      await everything;
+      log(`loaded ${name} in ${((performance.now() - started) / 1000).toFixed(1)} s; skipped: ${[...skipped].join(", ") || "none"}`);
+
+      // Standing up, facing +z, in metres.
+      let box = new THREE.Box3().setFromObject(avatar);
+      const extent = box.getSize(new THREE.Vector3());
+      if (extent.z > extent.y * 1.5) avatar.rotation.x = -Math.PI / 2; // lying down: it was Z-up
+      const unit = Math.max(extent.x, extent.y, extent.z) > 20 ? 0.01 : 1; // centimetres
+      avatar.scale.multiplyScalar(unit);
+      const holder = new THREE.Group();
+      holder.name = name;
+      holder.add(avatar);
+      holder.updateMatrixWorld(true);
+      box = new THREE.Box3().setFromObject(holder);
+      holder.position.y = -box.min.y;
+      holder.updateMatrixWorld(true);
+      const height = box.max.y - box.min.y;
+      const bones = [];
+      avatar.traverse((part) => part.isBone && bones.push(part));
+      const root = bones.find((bone) => bone.name === ROOT_BONE);
+      const rootHeight = root ? root.getWorldPosition(new THREE.Vector3()).y : height * 0.55; // the hips, in metres
+      log(`height ${height.toFixed(2)} m, hips ${rootHeight.toFixed(2)} m, ${bones.length} bones, unit ${unit}`);
+
+      let exportRoot = holder;
+      let clips = [];
+      const report = { name, gender, height: Math.round(height * 100) / 100, rootHeight: Math.round(rootHeight * 1000) / 1000 };
+
+      if (mode === "avatar") {
+        // Materials: real-looking skin and cloth, textures shrunk to JPEG (with alpha where the avatar cuts out hair or lashes).
+        const toCanvas = (picture) => {
+          if (!picture.data) return picture;
+          const canvas = Object.assign(document.createElement("canvas"), { width: picture.width, height: picture.height });
+          const context = canvas.getContext("2d");
+          const pixels = context.createImageData(picture.width, picture.height);
+          const channels = picture.data.length / (picture.width * picture.height);
+          for (let i = 0, j = 0; i < pixels.data.length; i += 4, j += channels) {
+            pixels.data[i] = picture.data[j];
+            pixels.data[i + 1] = picture.data[j + 1];
+            pixels.data[i + 2] = picture.data[j + 2];
+            pixels.data[i + 3] = channels === 4 ? picture.data[j + 3] : 255;
+          }
+          context.putImageData(pixels, 0, 0);
+          return canvas;
+        };
+        const shrink = (texture, alphaFrom, most = size) => {
+          const image = texture?.image;
+          if (!image || !image.width || image.width < 4) return null;
+          const out = Object.assign(document.createElement("canvas"), { width: Math.min(most, image.width), height: Math.min(most, image.height) });
+          const context = out.getContext("2d");
+          context.drawImage(toCanvas(image), 0, 0, out.width, out.height);
+          if (alphaFrom?.image?.width > 4) {
+            const mask = Object.assign(document.createElement("canvas"), { width: out.width, height: out.height });
+            mask.getContext("2d").drawImage(toCanvas(alphaFrom.image), 0, 0, out.width, out.height);
+            const alpha = mask.getContext("2d").getImageData(0, 0, out.width, out.height).data;
+            const colour = context.getImageData(0, 0, out.width, out.height);
+            for (let i = 0; i < colour.data.length; i += 4) colour.data[i + 3] = alpha[i];
+            context.putImageData(colour, 0, 0);
+          }
+          const result = new THREE.CanvasTexture(out);
+          result.flipY = texture.flipY;
+          result.wrapS = texture.wrapS;
+          result.wrapT = texture.wrapT;
+          result.userData.mimeType = alphaFrom?.image?.width > 4 ? "image/png" : "image/jpeg";
+          return result;
+        };
+        const notes = [];
+        avatar.traverse((part) => {
+          if (!part.isMesh) return;
+          part.material = [part.material].flat().map((old) => {
+            const map = shrink(old.map, old.alphaMap);
+            if (map) map.colorSpace = THREE.SRGBColorSpace;
+            const cut = map?.userData.mimeType === "image/png";
+            notes.push(`${old.name}${cut ? " (cut out)" : ""}`);
+            return new THREE.MeshStandardMaterial({
+              name: old.name,
+              map,
+              normalMap: shrink(old.normalMap ?? old.bumpMap, null, size / 2), // bumps need less detail than colour
+              color: map ? 0xffffff : old.color,
+              roughness: /head|skin|face/i.test(old.name) ? 0.55 : 0.75,
+              metalness: 0,
+              alphaTest: cut ? 0.5 : 0,
+              side: cut ? THREE.DoubleSide : THREE.FrontSide,
+            });
+          });
+          if (part.material.length === 1) part.material = part.material[0];
+        });
+        log(`materials: ${notes.join(", ")}`);
+      } else {
+        // The shared animations: only the bones are exported, with the clips.
+        const names = new Set(bones.map((bone) => bone.name));
+        const speeds = {};
+        for (const [clipName, file] of ANIMATIONS) {
+          const source = await loader.loadAsync(`${RAW}Animations/${file}`);
+          const clip = source.animations[0];
+          clip.name = clipName;
+          // Joint rotations for every bone, and position only for the hips: other bones keep each person's own proportions.
+          clip.tracks = clip.tracks.filter((track) => {
+            const [bone, property] = track.name.split(".");
+            return names.has(bone) && (property === "quaternion" || (property === "position" && bone === ROOT_BONE));
+          });
+          const travel = clip.tracks.find((track) => track.name === `${ROOT_BONE}.position`);
+          if (travel) {
+            const { times, values } = travel;
+            const last = times.length - 1;
+            const drift = [0, 1, 2].map((axis) => values[last * 3 + axis] - values[axis]);
+            speeds[clipName] = Math.round(((Math.hypot(...drift) * unit) / (times[last] - times[0] || 1)) * 100) / 100;
+            for (let i = 0; i <= last; i++) {
+              const k = (times[i] - times[0]) / (times[last] - times[0] || 1);
+              for (let axis = 0; axis < 3; axis++) values[i * 3 + axis] -= drift[axis] * k; // stays in place, loops cleanly
+            }
+          }
+          clip.optimize();
+          clips.push(clip);
+          log(`${clipName}: ${clip.duration.toFixed(2)} s, ${clip.tracks.length} tracks, travels ${speeds[clipName] ?? 0} m/s`);
+        }
+        report.speeds = speeds;
+        report.clips = clips.map((clip) => clip.name);
+        // Export the skeleton alone: no meshes, so the file holds only bones and motion.
+        avatar.traverse((part) => part.isMesh && (part.visible = false));
+      }
+
+      // Preview, lit like a game.
+      const scene = new THREE.Scene();
+      scene.background = new THREE.Color(0x30343c);
+      scene.add(new THREE.HemisphereLight(0xffffff, 0x404040, 1.2));
+      const sun = new THREE.DirectionalLight(0xffffff, 2.2);
+      sun.position.set(3, 6, 4);
+      scene.add(sun, holder);
+      const camera = new THREE.PerspectiveCamera(35, innerWidth / innerHeight, 0.05, 100);
+      camera.position.set(0.6, height * 0.62, 3.6);
+      camera.lookAt(0, height * 0.55, 0);
+      const renderer = new THREE.WebGLRenderer({ antialias: true, preserveDrawingBuffer: true });
+      renderer.setSize(innerWidth, innerHeight);
+      document.body.prepend(renderer.domElement);
+      if (mode === "animations") scene.add(new THREE.SkeletonHelper(holder));
+      renderer.render(scene, camera);
+
+      const glb = await new GLTFExporter().parseAsync(exportRoot, { binary: true, animations: clips, onlyVisible: true, maxTextureSize: size });
+      const bytes = new Uint8Array(glb);
+      let binary = "";
+      for (let i = 0; i < bytes.length; i += 0x8000) binary += String.fromCharCode(...bytes.subarray(i, i + 0x8000));
+      window.result = btoa(binary);
+      report.mb = Math.round((bytes.length / 1e6) * 100) / 100;
+      window.report = report;
+      log(`DONE ${JSON.stringify(report)}`);
+    } catch (error) {
+      log(`FAIL ${error.message}\n${error.stack}`);
+    }
+  </script>
+</body>
+</html>

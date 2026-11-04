@@ -17,7 +17,8 @@
     "design": "node src/tools/design.ts",
     "make": "node src/tools/make.ts",
     "models": "node src/tools/models.ts",
-    "polyhaven": "node src/tools/polyhaven.ts"
+    "polyhaven": "node src/tools/polyhaven.ts",
+    "people": "node src/tools/people.ts"
   },
   "devDependencies": {
     "@types/node": "^26.6.5",

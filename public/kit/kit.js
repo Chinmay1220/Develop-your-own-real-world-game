@@ -818,9 +818,11 @@ export async function startKit({ catalog, models = {} }) {
     },
 
     /**
-     * An animated character: a person (thief, kid, robot, guard, soldier, ghost) or a creature
-     * (ant, beetle, spider, bee, dog, cat, mouse, bird). Move character.root yourself; call
-     * character.play("idle" | "walk" | "run") to match how it moves. It faces +z when root.rotation.y is 0.
+     * An animated character: a real person (Rocketbox, such as "Police_Male_01"; see characters.js), a
+     * stylised person (thief, kid, robot, guard, soldier, ghost) or a creature (ant, beetle, spider, bee,
+     * dog, cat, mouse, bird). Move character.root yourself; call character.play("idle" | "walk" | "run")
+     * to match how it moves. It faces +z when root.rotation.y is 0. Real people also have
+     * character.speeds ({ walk, run } in m/s, matching their feet) and "crouch", "look", "cheer" and "talk".
      */
     character(look, { at = [0, 0, 0], color, scale = 1, turn = 0 } = {}) {
       const person = makeCharacter(look, color);
@@ -828,7 +830,7 @@ export async function startKit({ catalog, models = {} }) {
       person.root.rotation.y = turn;
       person.root.scale.setScalar(scale);
       person.height *= scale;
-      person.play = (name) => play(person, name);
+      person.play = (name, timeScale) => play(person, name, timeScale);
       person.face = (x, z) => (person.root.rotation.y = Math.atan2(x - person.root.position.x, z - person.root.position.z));
       scene.add(person.root);
       people.push(person);
@@ -967,7 +969,7 @@ export async function startKit({ catalog, models = {} }) {
       timers.splice(timers.indexOf(timer), 1);
       timer.fn();
     }
-    for (const person of people) person.mixer.update(dt);
+    for (const person of people) person.mixer?.update(dt); // real people get their mixer once they have loaded
     for (const bit of [...particles]) {
       bit.age += dt;
       bit.velocity.y -= 9.8 * dt;

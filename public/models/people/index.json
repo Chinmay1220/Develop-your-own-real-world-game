@@ -1,0 +1,233 @@
+{
+  "source": "Microsoft Rocketbox (github.com/microsoft/Microsoft-Rocketbox), MIT licence",
+  "animations": {
+    "m": {
+      "file": "animations-m.glb",
+      "rootHeight": 0.896,
+      "speeds": {
+        "idle": 0,
+        "walk": 1.01,
+        "run": 2.88,
+        "crouch": 0,
+        "look": 0,
+        "cheer": 0,
+        "talk": 0
+      },
+      "clips": [
+        "idle",
+        "walk",
+        "run",
+        "crouch",
+        "look",
+        "cheer",
+        "talk"
+      ]
+    },
+    "f": {
+      "file": "animations-f.glb",
+      "rootHeight": 0.924,
+      "speeds": {
+        "idle": 0,
+        "walk": 1.21,
+        "run": 2.77,
+        "crouch": 0,
+        "look": 0,
+        "cheer": 0,
+        "talk": 0
+      },
+      "clips": [
+        "idle",
+        "walk",
+        "run",
+        "crouch",
+        "look",
+        "cheer",
+        "talk"
+      ]
+    }
+  },
+  "people": {
+    "Police_Male_01": {
+      "description": "police officer, man",
+      "gender": "m",
+      "height": 1.81,
+      "rootHeight": 0.899,
+      "file": "Police_Male_01.glb"
+    },
+    "Police_Female_01": {
+      "description": "police officer, woman",
+      "gender": "f",
+      "height": 1.85,
+      "rootHeight": 0.895,
+      "file": "Police_Female_01.glb"
+    },
+    "Security_Male_01": {
+      "description": "security guard, man",
+      "gender": "m",
+      "height": 1.83,
+      "rootHeight": 0.896,
+      "file": "Security_Male_01.glb"
+    },
+    "Security_Female_01": {
+      "description": "security guard, woman",
+      "gender": "f",
+      "height": 1.74,
+      "rootHeight": 0.924,
+      "file": "Security_Female_01.glb"
+    },
+    "Military_Male_01": {
+      "description": "soldier in uniform, man",
+      "gender": "m",
+      "height": 1.84,
+      "rootHeight": 0.899,
+      "file": "Military_Male_01.glb"
+    },
+    "Military_Female_01": {
+      "description": "soldier in uniform, woman",
+      "gender": "f",
+      "height": 1.78,
+      "rootHeight": 0.928,
+      "file": "Military_Female_01.glb"
+    },
+    "Business_Male_01": {
+      "description": "businessman in a suit",
+      "gender": "m",
+      "height": 1.81,
+      "rootHeight": 0.896,
+      "file": "Business_Male_01.glb"
+    },
+    "Business_Female_01": {
+      "description": "businesswoman",
+      "gender": "f",
+      "height": 1.74,
+      "rootHeight": 0.924,
+      "file": "Business_Female_01.glb"
+    },
+    "Medical_Male_01": {
+      "description": "doctor, man",
+      "gender": "m",
+      "height": 1.81,
+      "rootHeight": 0.896,
+      "file": "Medical_Male_01.glb"
+    },
+    "Medical_Female_01": {
+      "description": "nurse or doctor, woman",
+      "gender": "f",
+      "height": 1.74,
+      "rootHeight": 0.926,
+      "file": "Medical_Female_01.glb"
+    },
+    "Fire_Male_01": {
+      "description": "firefighter",
+      "gender": "m",
+      "height": 1.86,
+      "rootHeight": 0.896,
+      "file": "Fire_Male_01.glb"
+    },
+    "Construction_Male_01": {
+      "description": "construction worker",
+      "gender": "m",
+      "height": 1.85,
+      "rootHeight": 0.896,
+      "file": "Construction_Male_01.glb"
+    },
+    "Pilot_Male_01": {
+      "description": "airline pilot",
+      "gender": "m",
+      "height": 1.84,
+      "rootHeight": 0.896,
+      "file": "Pilot_Male_01.glb"
+    },
+    "Chef_Female_01": {
+      "description": "chef",
+      "gender": "f",
+      "height": 1.73,
+      "rootHeight": 0.924,
+      "file": "Chef_Female_01.glb"
+    },
+    "Sports_Male_02": {
+      "description": "football player in a black and white striped kit",
+      "gender": "m",
+      "height": 1.82,
+      "rootHeight": 0.912,
+      "file": "Sports_Male_02.glb"
+    },
+    "Sports_Female_02": {
+      "description": "woman in sportswear (tank top and track trousers)",
+      "gender": "f",
+      "height": 1.74,
+      "rootHeight": 0.928,
+      "file": "Sports_Female_02.glb"
+    },
+    "Delivery_Male_01": {
+      "description": "delivery driver",
+      "gender": "m",
+      "height": 1.82,
+      "rootHeight": 0.896,
+      "file": "Delivery_Male_01.glb"
+    },
+    "Gardener_Male_01": {
+      "description": "gardener",
+      "gender": "m",
+      "height": 1.81,
+      "rootHeight": 0.896,
+      "file": "Gardener_Male_01.glb"
+    },
+    "Male_Adult_08": {
+      "description": "young man in a light blue shirt",
+      "gender": "m",
+      "height": 1.83,
+      "rootHeight": 0.896,
+      "file": "Male_Adult_08.glb"
+    },
+    "Male_Adult_12": {
+      "description": "young man in a denim jacket and jeans",
+      "gender": "m",
+      "height": 1.81,
+      "rootHeight": 0.896,
+      "file": "Male_Adult_12.glb"
+    },
+    "Male_Adult_03": {
+      "description": "older grey-haired man in a tweed jacket",
+      "gender": "m",
+      "height": 1.81,
+      "rootHeight": 0.896,
+      "file": "Male_Adult_03.glb"
+    },
+    "Female_Adult_05": {
+      "description": "young woman in a pink blazer and jeans",
+      "gender": "f",
+      "height": 1.74,
+      "rootHeight": 0.924,
+      "file": "Female_Adult_05.glb"
+    },
+    "Female_Adult_14": {
+      "description": "woman in a beige jacket and jeans",
+      "gender": "f",
+      "height": 1.74,
+      "rootHeight": 0.928,
+      "file": "Female_Adult_14.glb"
+    },
+    "Female_Adult_10": {
+      "description": "woman in a black abaya and headscarf",
+      "gender": "f",
+      "height": 1.74,
+      "rootHeight": 0.926,
+      "file": "Female_Adult_10.glb"
+    },
+    "Male_Child_01": {
+      "description": "boy",
+      "gender": "m",
+      "height": 1.43,
+      "rootHeight": 0.788,
+      "file": "Male_Child_01.glb"
+    },
+    "Female_Child_01": {
+      "description": "girl",
+      "gender": "f",
+      "height": 1.43,
+      "rootHeight": 0.788,
+      "file": "Female_Child_01.glb"
+    }
+  }
+}

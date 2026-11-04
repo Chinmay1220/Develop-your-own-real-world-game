@@ -35,6 +35,7 @@ Every result below comes from a real run. Nothing is invented.
 | [26](#step-26-no-engine-a-game-with-no-game-code) | No Engine: a game with no game code |
 | [27](#step-27-rewind-a-world-model-that-runs-time-backwards) | Rewind: a world model that runs time backwards |
 | [28](#step-28-real-scanned-models-surfaces-and-skies-in-every-game-poly-haven) | Real scanned models, surfaces and skies in every game (Poly Haven) |
+| [29](#step-29-real-people-in-every-game-microsoft-rocketbox) | Real people in every game (Microsoft Rocketbox) |
 | [Final](#final-check) | Final check, and how to repeat it |
 | [Next](#not-done-yet) | Not done yet |
 
@@ -1240,6 +1241,45 @@ Fixed along the way:
 | ![Room](images/polyhaven-kit-room.png) | ![Pirate cove](images/polyhaven-look-pirate.png) |
 
 **Still missing:** realistic people (the only free animated characters are the sci-fi soldier and a mannequin), game-weight trees, and modern cars. People come next, from Microsoft Rocketbox (MIT).
+
+## Step 29: Real people in every game (Microsoft Rocketbox)
+
+**The gap:** the only free animated people were a sci-fi soldier and a mannequin, which look wrong in a living room or on a beach.
+
+**What was found:** [Microsoft Rocketbox](https://github.com/microsoft/Microsoft-Rocketbox), released under MIT.
+- **People:** 115 realistic rigged people (74 professions, 40 adults, 4 children).
+- **Animations:** 417 animations: 326 in place, and walk and run cycles that move forward.
+- **Animals:** 25 animals, but with no animations.
+- **The problem:** the source is FBX with 2048 px uncompressed TGA textures, about 85 MB per person.
+
+**The converter** (`public/lab/rocketbox.html`, run by `npm run people`) does this in a hidden Edge window:
+1. Loads the FBX and its textures straight from GitHub. Specular maps are skipped.
+2. Rebuilds the materials, with colour at 1024 px JPEG and bump maps at 512 px, and stands the person up facing +z, in metres.
+3. Exports one GLB per person (body only).
+4. Exports the **shared animations once per gender**: idle, walk, run, crouch, look (around), cheer and talk.
+   - Only joint rotations are kept, plus the hips' position, so every person keeps their own proportions.
+   - The forward travel of walk and run is taken out so they loop in place.
+   - The travel measures the speed that matches the feet: men walk at 1.01 m/s and run at 2.88 m/s; women walk at 1.21 m/s and run at 2.77 m/s.
+5. Writes `index.json` with each person's description, height and hip height.
+
+**In the kit:**
+- `kit.character("Police_Male_01")` and the other 25 names give a real person. It appears as soon as its body loads; `play()` before that is remembered.
+- The shared animations are fitted to each person by their hip height, so a 1.43 m child doesn't float.
+- `character.speeds` gives the walk and run speeds.
+- The writer gets all 26 people with descriptions and heights, and is told to use them for every human.
+
+**Fixed along the way:**
+- **Textures shrunk before they had arrived** (the FBX loads first): the converter now waits for the loading manager.
+- **The first file was 5.4 MB:** the 11.7 s idle and the per-person animations made up most of it. Sharing the animations brought a person to about 3 MB.
+- **People showed up all white in games:** the 3D loader unpacks pictures stored inside a GLB by fetching a `blob:` URL, which the sealed frame's content policy blocked. `connect-src` now allows `blob:`, which is the frame's own data and can't reach the network.
+- **Two "athletes" were a swimmer and a woman in a bikini:** they were replaced with a football player and a woman in sportswear.
+- **Closing the test browser could crash** when Windows still held Edge's profile folder: a leftover temporary folder is now ignored.
+
+**Result:** 26 people (82 MB in the repo), heights 1.73–1.86 m for adults and 1.43 m for children. All 7 animations played for both genders.
+
+| The converter's preview | All 7 animations, a woman and a man | The 26 people in the kit |
+|---|---|---|
+| ![Converter](images/people-converter.png) | ![Animations](images/people-animations.png) | ![Line-up](images/people-lineup.png) |
 
 ## Final check
 

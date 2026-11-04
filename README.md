@@ -315,6 +315,7 @@ Notebooks, round logs, designed levels, made games and their lessons are saved i
 | `npm run demo` | Plays the four scripted rounds in the terminal |
 | `npm test` | Runs the 42 automated tests |
 | `npm run polyhaven` | Rebuilds the index of Poly Haven's game-ready models, surfaces and skies (`public/models/polyhaven.json`) |
+| `npm run people` | Converts the realistic people from Microsoft Rocketbox into `public/models/people/` (the server must be running). `npm run people -- Chef_Female_01` converts only the people named. |
 | `npm run typecheck` | Checks the TypeScript types |
 | `npm run api:check` | Checks your Meta API key (needs `.env`) |
 | `npm run api:try` | Plays round 1 on the real Meta models, with time and cost per step. `npm run api:try -- 2` plays two rounds. Needs `.env` and costs a few cents per round. |
