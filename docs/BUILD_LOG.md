@@ -36,6 +36,7 @@ Every result below comes from a real run. Nothing is invented.
 | [27](#step-27-rewind-a-world-model-that-runs-time-backwards) | Rewind: a world model that runs time backwards |
 | [28](#step-28-real-scanned-models-surfaces-and-skies-in-every-game-poly-haven) | Real scanned models, surfaces and skies in every game (Poly Haven) |
 | [29](#step-29-real-people-in-every-game-microsoft-rocketbox) | Real people in every game (Microsoft Rocketbox) |
+| [30](#step-30-a-new-studio-page-designed-with-react-bits-fancy-components-and-cobe) | A new studio page, designed with React Bits, Fancy Components and COBE |
 | [Final](#final-check) | Final check, and how to repeat it |
 | [Next](#not-done-yet) | Not done yet |
 
@@ -1280,6 +1281,38 @@ Fixed along the way:
 | The converter's preview | All 7 animations, a woman and a man | The 26 people in the kit |
 |---|---|---|
 | ![Converter](images/people-converter.png) | ![Animations](images/people-animations.png) | ![Line-up](images/people-lineup.png) |
+
+## Step 30: A new studio page, designed with React Bits, Fancy Components and COBE
+
+**Request:** "use whatever github libraries you need for development of the product like Fancy Components, COBE, React Bits for designs".
+
+**How the libraries are used:**
+- **The page stays plain JavaScript, with no build step.** The components were read from their GitHub sources and ported:
+
+| Part of the page | From | What was kept |
+|---|---|---|
+| The glowing aurora behind the hero (`design/aurora.js`) | React Bits **Aurora** | The WebGL2 shader unchanged (OKLCH colour ramp, simplex-noise layers, reaching toward the pointer, the intro reveal). The React wrapper became one function. |
+| The light that follows the pointer on the step and game cards (`design/spotlight.js`) | React Bits **SpotlightCard** | The radial falloff, smoothing, proximity, border glow and press flare. |
+| The shine sweeping across "Speak any game." (`design/text.js`) | React Bits **ShinyText** | The colour band, angle, smooth easing and pause between sweeps. |
+| The rotating game ideas ("Say *a pirate battle at sunset*…") (`design/text.js`) | Fancy **TextRotate** | Letters rise in with a spring and the old word leaves upwards, now with the Web Animations API instead of Motion. |
+| The globe of example worlds (`design/globe.js`) | **COBE** 0.6.4 from jsDelivr | Used as is. Picking an example (or the rotating line) swings it to that place; it can be dragged. |
+
+- **Licences:** React Bits is MIT + Commons Clause, which allows use *as part of an application*, with its notice kept. Fancy and COBE are MIT. `public/design/THIRD_PARTY.md` has the notices, and the footer links to it.
+
+**The page (`make.html`, `make.css`, `make.js`):**
+- **Hero:** say or type an idea, with example chips (Paris heist, Caribbean pirates, New York chase, Monaco GP…) that fill the prompt and turn the globe.
+- **How it works:** four steps, each naming the Meta model at work.
+- **Gallery:** game cards with the test browser's screenshot and badges ("Meta's AI inside", "Real scanned world", "Real people").
+  - The badges come from each game's code (`featuresOf` in `games.ts`).
+  - Only games written by a Muse model are listed; hand-written tests and replaced versions are hidden.
+- **Making a game:** a live view of the real steps (writing, testing, reviewing, ready), with the maker's own log lines, including what Meta's AI decided inside the game during the test. The new `GET /api/make/progress` provides them.
+- **Playing:**
+  - The game sits below a slim bar, beside a docked panel of Meta's AI. The first try floated the bar and panel over the game and hid its score line and meter.
+  - Screenshots come from the new `GET /api/games/<id>/shot.png`.
+
+| Hero | How it works | The gallery | Playing, with Meta's AI beside the game |
+|---|---|---|---|
+| ![Hero](images/studio-hero.png) | ![Steps](images/studio-how.png) | ![Gallery](images/studio-gallery.png) | ![Playing](images/studio-player.png) |
 
 ## Final check
 

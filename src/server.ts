@@ -13,7 +13,7 @@ import { createLive } from "./live/live.ts";
 import { createNoEngine, EngineError, publicWorld } from "./paint/engine.ts";
 import { createRewind, publicCase, RewindError } from "./rewind/engine.ts";
 import { readCall } from "./live/rules.ts";
-import { listGames, loadGame } from "./make/games.ts";
+import { GAMES_DIR, listGames, loadGame } from "./make/games.ts";
 import { makeGame } from "./make/maker.ts";
 import { createReviewer } from "./make/reviewer.ts";
 import { testGame } from "./make/tester.ts";
@@ -36,6 +36,8 @@ const noEngine = createNoEngine();
 const rewind = createRewind();
 let designing = false;
 let making = false;
+// What the game maker is doing right now, so the page can show it while a game is made.
+let progress: { making: boolean; prompt: string; started: number; lines: string[] } = { making: false, prompt: "", started: 0, lines: [] };
 const MAX_SPEECH_SECONDS = 60;
 
 const PUBLIC_DIR = join(ROOT, "public");
@@ -52,6 +54,7 @@ const CONTENT_TYPES: Record<string, string> = {
   ".jpg": "image/jpeg",
   ".hdr": "application/octet-stream",
   ".txt": "text/plain; charset=utf-8",
+  ".md": "text/plain; charset=utf-8",
 };
 const PLAYER_ACTIONS = new Set<ActionKind>(["move", "take", "drop", "hide", "unhide", "throw", "use", "search", "wait", "free"]);
 
@@ -74,6 +77,20 @@ async function handleApi(request: IncomingMessage, response: ServerResponse, pat
     return level ? send(response, 200, level) : send(response, 404, { error: "No such level" });
   }
   if (request.method === "GET" && path === "/api/games") return send(response, 200, listGames());
+  if (request.method === "GET" && path === "/api/make/progress") return send(response, 200, progress);
+  if (request.method === "GET" && /^\/api\/games\/[^/]+\/shot\.png$/.test(path)) {
+    // The screenshot the test browser took, for the gallery. The id is checked by loadGame first.
+    const id = path.split("/")[3];
+    if (!loadGame(id)) return send(response, 404, { error: "No such game" });
+    try {
+      const png = await readFile(join(GAMES_DIR, `${id}.png`));
+      response.writeHead(200, { "Content-Type": "image/png", "Cache-Control": "no-cache" });
+      response.end(png);
+      return;
+    } catch {
+      return send(response, 404, { error: "No screenshot yet" });
+    }
+  }
   if (request.method === "GET" && path.startsWith("/api/games/")) {
     const game = loadGame(path.slice("/api/games/".length));
     return game ? send(response, 200, game) : send(response, 404, { error: "No such game" });
@@ -166,13 +183,19 @@ async function make(request: IncomingMessage, response: ServerResponse): Promise
   if (!writer) return send(response, 503, { error: "Making games needs a Meta API key in .env." });
   if (making) return send(response, 409, { error: "Already making a game. Try again when it's done." });
   making = true;
+  progress = { making: true, prompt, started: Date.now(), lines: [] };
+  const log = (line: string) => {
+    console.log(`[make] ${line}`);
+    progress.lines.push(line.slice(0, 400));
+  };
   const spent = () => (writer.usage()?.usd ?? 0) + (reviewer?.usage()?.usd ?? 0);
   const costBefore = spent();
   try {
-    const result = await makeGame(prompt, writer, (id) => testGame(id, config.port), { log: (line) => console.log(`[make] ${line}`), reviewer });
+    const result = await makeGame(prompt, writer, (id) => testGame(id, config.port), { log, reviewer });
     send(response, 200, { id: result.game.id, title: result.game.title, tries: result.attempts.length, problems: result.attempts.at(-1), usd: spent() - costBefore });
   } finally {
     making = false;
+    progress.making = false;
   }
 }
 

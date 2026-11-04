@@ -243,7 +243,8 @@ The full design is in [docs/DESIGN.md](docs/DESIGN.md).
 ```
 ├── public/                    Browser pages (HTML, CSS, plain JavaScript)
 │   ├── paint.html, paint.js   No Engine: say any world and play it; Meta's AI decides and paints every frame
-│   ├── make.html, make.js     Speak Any Game: say or type a game, play what the AI writes
+│   ├── make.html, make.js     Speak Any Game: say or type a game, play what the AI writes (make.css: its look)
+│   ├── design/                Page effects ported from React Bits and Fancy, and a COBE globe (THIRD_PARTY.md)
 │   ├── kit/kit.js             The game kit every written game runs on
 │   ├── kit/live.js            Meta's AI inside the game: kit.world, kit.mind, the Enter box, lessons
 │   ├── sandbox.js, play.html  The sealed frame games run in (and the bridge for its AI questions), and a page that plays one game

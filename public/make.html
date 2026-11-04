@@ -4,75 +4,106 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Speak Any Game</title>
-  <style>
-    html, body { margin: 0; height: 100%; overflow: hidden; background: #05070b; color: #e7ecf5; font-family: system-ui, -apple-system, "Segoe UI", sans-serif; }
-    #layout { display: grid; grid-template-columns: 360px 1fr; height: 100%; }
-    #side { overflow: auto; padding: 16px; box-sizing: border-box; background: #10151f; border-right: 1px solid #222b3d; }
-    h1 { margin: 0 0 2px; font-size: 21px; }
-    .tagline { margin: 0 0 12px; color: #f5b942; font-weight: 600; font-size: 14px; line-height: 1.35; }
-    textarea { width: 100%; box-sizing: border-box; min-height: 76px; resize: vertical; padding: 8px 10px; border: 1px solid #34415f; border-radius: 8px; background: #0b1019; color: #e7ecf5; font: inherit; font-size: 14px; }
-    .actions { display: flex; gap: 8px; margin-top: 8px; }
-    button { font: inherit; font-size: 14px; border-radius: 8px; padding: 7px 14px; border: none; font-weight: 700; cursor: pointer; }
-    button:disabled { opacity: 0.55; cursor: wait; }
-    #make { background: #f5b942; color: #10141c; }
-    .speak { display: inline-flex; align-items: center; gap: 6px; background: #2a3550; color: #e7ecf5; --level: 0; }
-    .speak.listening { background: #ef5d5d; color: #10141c; box-shadow: 0 0 0 calc(2px + var(--level) * 10px) rgba(239, 93, 79, 0.35); }
-    #status { margin: 10px 0 0; color: #95a1b6; font-size: 13px; line-height: 1.4; min-height: 1em; }
-    #status.error { color: #ef8a7a; }
-    h2 { margin: 18px 0 8px; font-size: 13px; text-transform: uppercase; letter-spacing: 0.06em; color: #95a1b6; }
-    .card { display: block; width: 100%; text-align: left; margin-bottom: 8px; padding: 10px 12px; border: 1px solid #2a3550; border-radius: 10px; background: #151c29; color: inherit; font-weight: 400; }
-    .card.selected { border-color: #f5b942; }
-    .card b { display: block; font-size: 15px; margin-bottom: 2px; }
-    .card span { display: block; font-size: 13px; color: #c9d2e3; }
-    .card i { display: block; margin-top: 4px; font-size: 12px; color: #7d8aa3; }
-    #ai { margin-top: 14px; padding: 10px 12px; border: 1px solid #2a3550; border-radius: 10px; background: #0d121c; }
-    #ai h2 { margin: 0 0 6px; }
-    #ai-tip { margin: 0 0 8px; font-size: 13px; line-height: 1.4; color: #c9d2e3; }
-    #ai-tip kbd { font: inherit; font-weight: 800; padding: 0 5px; border-radius: 4px; background: #2a3550; }
-    #ai-log { max-height: 220px; overflow: auto; font-size: 12px; line-height: 1.4; }
-    #ai-log div { padding: 5px 0; border-top: 1px solid #1c2435; color: #c9d2e3; }
-    #ai-log div b { color: #f5b942; font-weight: 700; }
-    #ai-log div.mind b { color: #7fe3d0; }
-    #ai-log div.learn b { color: #c79bff; }
-    #ai-log div.failed { color: #ef8a7a; }
-    #forget { margin-top: 8px; background: #2a3550; color: #e7ecf5; font-size: 12px; padding: 5px 10px; }
-    #stage { position: relative; }
-    #game { position: absolute; inset: 0; }
-    #empty { position: absolute; inset: 0; display: grid; place-items: center; text-align: center; color: #7d8aa3; font-size: 15px; padding: 24px; }
-    #errors { position: absolute; left: 12px; bottom: 12px; max-width: 70%; max-height: 35%; overflow: auto; margin: 0; padding: 8px 10px; border-radius: 8px; background: rgba(120, 20, 20, 0.85); font-size: 12px; white-space: pre-wrap; }
-    #errors:empty { display: none; }
-    @media (max-width: 800px) { #layout { grid-template-columns: 1fr; grid-template-rows: auto 60vh; } #side { max-height: 40vh; } }
-  </style>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="make.css">
 </head>
 <body>
-  <div id="layout">
-    <div id="side">
-      <h1>Speak Any Game</h1>
-      <p class="tagline">Say or type any game. Meta's Muse Wonder writes it, a test browser plays it, and errors get fixed.</p>
-      <textarea id="prompt" placeholder="For example: a racing game on Mars where I collect fuel cans against the clock."></textarea>
-      <div class="actions">
-        <button id="speak" class="speak" title="Say your idea. It stops listening when you pause.">
-          <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path fill="currentColor" d="M12 15a3 3 0 0 0 3-3V6a3 3 0 0 0-6 0v6a3 3 0 0 0 3 3Zm5-3a5 5 0 0 1-10 0H5a7 7 0 0 0 6 6.93V21h2v-2.07A7 7 0 0 0 19 12h-2Z"/></svg>
-          <span>Speak</span>
-        </button>
-        <button id="make">Make my game</button>
+  <div id="aurora" aria-hidden="true"></div>
+
+  <nav class="nav">
+    <a class="brand" href="/make.html"><span class="dot"></span>Speak Any Game</a>
+    <div class="links"><a href="#how">How it works</a><a href="#gallery">Games</a><a href="/paint.html">No Engine</a><a href="/rewind.html">Rewind</a></div>
+    <span class="badge">Built on Meta's Muse models</span>
+  </nav>
+
+  <main id="studio">
+    <section class="hero">
+      <div class="copy">
+        <p class="eyebrow">Say it · Meta's AI builds it · you play it</p>
+        <h1><span id="shiny">Speak any game.</span></h1>
+        <p class="lead">Say <span id="rotate">a night heist in Paris</span>, and Muse Wonder writes it. Real scanned worlds and real people fill it, and Meta's world model runs it while you play.</p>
+        <div class="composer">
+          <textarea id="prompt" placeholder="Describe any game. For example: a night heist in a Paris museum, where I steal a golden statue while two security guards patrol."></textarea>
+          <div class="row">
+            <button id="speak" class="speak" title="Say your idea. It stops listening when you pause.">
+              <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path fill="currentColor" d="M12 15a3 3 0 0 0 3-3V6a3 3 0 0 0-6 0v6a3 3 0 0 0 3 3Zm5-3a5 5 0 0 1-10 0H5a7 7 0 0 0 6 6.93V21h2v-2.07A7 7 0 0 0 19 12h-2Z"/></svg>
+              <span>Speak</span>
+            </button>
+            <span class="hint">or type, then</span>
+            <button id="make" class="make">Make my game <span aria-hidden="true">→</span></button>
+          </div>
+        </div>
+        <div class="chips" id="examples"></div>
+        <p id="status"></p>
       </div>
-      <p id="status"></p>
-      <div id="ai" hidden>
-        <h2>Meta's AI in this game</h2>
-        <p id="ai-tip"></p>
-        <div id="ai-log"></div>
-        <button id="forget" title="The world model and the characters forget their lessons, and the next round starts fresh.">Forget what it learned</button>
+      <div class="world">
+        <canvas id="globe" aria-label="A globe with the places of the example games"></canvas>
+        <p class="world-caption"><b>Every world you can say.</b> Pick a place on the list and the globe turns to it.</p>
       </div>
-      <h2>Games</h2>
-      <div id="games"></div>
+    </section>
+
+    <section class="block" id="how">
+      <div class="section-head">
+        <h2>From a sentence to a game,<br>in about a minute.</h2>
+        <p>Every step is a real Meta model at work. Nothing is a template: Muse Wonder writes each game's code from your words.</p>
+      </div>
+      <div class="steps">
+        <div class="step"><span class="number">1</span><h3>Say it</h3><p>Type your idea, or speak it. Messy words are fine.</p><span class="model">Muse Voice Transcribe</span></div>
+        <div class="step"><span class="number">2</span><h3>Muse Wonder writes it</h3><p>The whole game as code: rules, controls, a world of real scanned objects and real people.</p><span class="model">Muse Wonder · Poly Haven · Rocketbox</span></div>
+        <div class="step"><span class="number">3</span><h3>A robot plays it</h3><p>A hidden browser plays the game, and Muse Wonder looks at screenshots. Anything wrong goes back to be fixed.</p><span class="model">Muse Wonder (vision)</span></div>
+        <div class="step"><span class="number">4</span><h3>Meta's AI runs it</h3><p>Press Enter in any game and try anything: the world model decides. Characters think, and learn your tricks.</p><span class="model">Muse Spark · Muse Wonder</span></div>
+      </div>
+    </section>
+
+    <section class="block" id="gallery">
+      <div class="section-head">
+        <h2>Games made by Meta's AI</h2>
+        <p>Each one written from a single sentence, tested by a robot, and reviewed from its screenshots. Click one to play.</p>
+      </div>
+      <div class="grid" id="games"></div>
+    </section>
+
+    <footer>
+      <b>Meta models:</b> Muse Wonder writes and reviews the games and teaches the characters · Muse Spark is the world model and the characters' minds · Muse Voice Transcribe hears you.
+      <b>Real assets:</b> scanned models, surfaces and skies from Poly Haven (CC0) · people from Microsoft Rocketbox (MIT).
+      <b>Design:</b> Aurora, Spotlight Card and Shiny Text ported from React Bits · Text Rotate from Fancy Components · globe by COBE. See <a href="/design/THIRD_PARTY.md">notices</a>.
+    </footer>
+  </main>
+
+  <section id="player" hidden>
+    <div class="player-bar">
+      <button id="back" class="glass">← Studio</button>
+      <div class="title glass"><b id="game-title"></b><span id="game-pitch"></span></div>
+      <span class="spacer"></span>
+      <button id="toggle-ai" class="glass">Meta's AI</button>
     </div>
-    <div id="stage">
-      <div id="empty">Describe a game on the left, or pick one from the list.</div>
-      <div id="game"></div>
-      <pre id="errors"></pre>
+    <div id="game"></div>
+    <pre id="errors"></pre>
+    <aside id="ai" hidden>
+      <h3>Meta's AI in this game</h3>
+      <p id="ai-tip"></p>
+      <div id="ai-log"></div>
+      <button id="forget" title="The world model and the characters forget their lessons, and the next round starts fresh." hidden>Forget what it learned</button>
+    </aside>
+  </section>
+
+  <div id="making" hidden>
+    <div class="making-card">
+      <h2>Meta's AI is making your game</h2>
+      <p class="quote" id="making-prompt"></p>
+      <ol class="stages">
+        <li data-stage="write"><b>Writing</b>Muse Wonder writes the code</li>
+        <li data-stage="test"><b>Testing</b>A robot plays it</li>
+        <li data-stage="review"><b>Reviewing</b>Muse Wonder checks the screenshots</li>
+        <li data-stage="done"><b>Ready</b>Your game opens</li>
+      </ol>
+      <div id="making-log"></div>
+      <p id="making-time"></p>
     </div>
   </div>
+
   <script type="module" src="make.js"></script>
 </body>
 </html>

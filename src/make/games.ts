@@ -35,13 +35,30 @@ export function saveGame(game: Game, screenshot?: Buffer | null): void {
   if (screenshot) writeFileSync(join(GAMES_DIR, `${game.id}.png`), screenshot);
 }
 
-export function listGames(): Omit<Game, "code">[] {
+/** What a game uses, read from its code, for the gallery's badges. */
+export interface Features {
+  world: boolean; // Meta's world model and minds while it runs
+  people: boolean; // real people (Rocketbox)
+  scanned: boolean; // real scanned models, surfaces or skies (Poly Haven)
+  shot: boolean; // a screenshot from its test
+}
+
+export function featuresOf(code: string, id: string): Features {
+  return {
+    world: /kit\.(world|mind)\(/.test(code),
+    people: /kit\.character\(\s*["'`](?:[A-Z][a-z]+_){1,2}(?:Male|Female|Adult|Child)?_?\d\d/.test(code),
+    scanned: /["'`]polyhaven\//.test(code),
+    shot: existsSync(join(GAMES_DIR, `${id}.png`)),
+  };
+}
+
+export function listGames(): (Omit<Game, "code"> & { features: Features })[] {
   if (!existsSync(GAMES_DIR)) return [];
   return readdirSync(GAMES_DIR)
     .filter((file) => file.endsWith(".json"))
     .map((file) => {
       const { code, ...rest } = JSON.parse(readFileSync(join(GAMES_DIR, file), "utf8")) as Game;
-      return rest;
+      return { ...rest, features: featuresOf(code, rest.id) };
     })
     .sort((a, b) => b.made.localeCompare(a.made));
 }
