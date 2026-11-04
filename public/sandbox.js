@@ -30,8 +30,9 @@ export async function runGame(container, game, catalog, onMessage = () => {}, op
   const policy = [
     "default-src 'none'",
     `script-src 'unsafe-inline' blob: ${origin} https://cdn.jsdelivr.net`,
-    `connect-src https://cdn.jsdelivr.net ${origin}/models/ ${origin}/assets/`, // models, sky and textures only: never the API
-    `img-src data: blob: https://cdn.jsdelivr.net ${origin}/models/ ${origin}/assets/`,
+    // Models, skies and textures only (ours, and Poly Haven's CC0 library): never the API.
+    `connect-src https://cdn.jsdelivr.net https://dl.polyhaven.org ${origin}/models/ ${origin}/assets/`,
+    `img-src data: blob: https://cdn.jsdelivr.net https://dl.polyhaven.org ${origin}/models/ ${origin}/assets/`,
     "style-src 'unsafe-inline'",
     "media-src data: blob:",
   ].join("; ");

@@ -298,7 +298,7 @@ The full design is in [docs/DESIGN.md](docs/DESIGN.md).
 │   ├── view.ts                What the browser receives
 │   ├── demo.ts                The scripted terminal demo
 │   └── demo-script.ts         The four scripted rounds (the tests replay them too)
-├── test/                      41 automated tests
+├── test/                      42 automated tests
 └── docs/
     ├── DESIGN.md              The full plan
     ├── BUILD_LOG.md           Step-by-step record of what was built and how it was checked
@@ -313,7 +313,8 @@ Notebooks, round logs, designed levels, made games and their lessons are saved i
 |---|---|
 | `npm start` | Starts the game at http://localhost:3000. Set `PORT` to change the port. |
 | `npm run demo` | Plays the four scripted rounds in the terminal |
-| `npm test` | Runs the 41 automated tests |
+| `npm test` | Runs the 42 automated tests |
+| `npm run polyhaven` | Rebuilds the index of Poly Haven's game-ready models, surfaces and skies (`public/models/polyhaven.json`) |
 | `npm run typecheck` | Checks the TypeScript types |
 | `npm run api:check` | Checks your Meta API key (needs `.env`) |
 | `npm run api:try` | Plays round 1 on the real Meta models, with time and cost per step. `npm run api:try -- 2` plays two rounds. Needs `.env` and costs a few cents per round. |

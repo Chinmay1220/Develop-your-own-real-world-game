@@ -1,0 +1,241 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Realistic models test</title>
+  <style>html,body{margin:0;height:100%;overflow:hidden;background:#000}canvas{display:block}#note{position:fixed;left:12px;bottom:10px;color:#fff;font:13px system-ui;text-shadow:0 1px 4px #000}</style>
+  <script type="importmap">{ "imports": { "three": "https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js", "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/" } }</script>
+</head>
+<body>
+  <div id="note">Loading real models from Poly Haven…</div>
+  <script type="module">
+    // A look test: realistic scanned models from Poly Haven (CC0), loaded straight from its servers,
+    // lit by a photographed sky, with contact shadows (ambient occlusion). ?scene=pirate or ?scene=room
+    import * as THREE from "three";
+    import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
+    import { RGBELoader } from "three/addons/loaders/RGBELoader.js";
+    import { Water } from "three/addons/objects/Water.js";
+    import { EffectComposer } from "three/addons/postprocessing/EffectComposer.js";
+    import { RenderPass } from "three/addons/postprocessing/RenderPass.js";
+    import { GTAOPass } from "three/addons/postprocessing/GTAOPass.js";
+    import { OutputPass } from "three/addons/postprocessing/OutputPass.js";
+    import { MODELS, SURFACES } from "./lab-data.js";
+
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(50, innerWidth / innerHeight, 0.1, 4000);
+    const renderer = new THREE.WebGLRenderer({ antialias: true });
+    renderer.setSize(innerWidth, innerHeight);
+    renderer.setPixelRatio(Math.min(devicePixelRatio, 1.5));
+    renderer.toneMapping = THREE.ACESFilmicToneMapping;
+    renderer.shadowMap.enabled = true;
+    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    document.body.append(renderer.domElement);
+    const pmrem = new THREE.PMREMGenerator(renderer);
+    const which = new URLSearchParams(location.search).get("scene") ?? "pirate";
+
+    // Poly Haven's model files name their textures by a relative path; the real files live elsewhere.
+    const where = Object.assign({}, ...Object.values(MODELS).map((model) => model.include));
+    const manager = new THREE.LoadingManager();
+    manager.setURLModifier((url) => {
+      for (const [path, full] of Object.entries(where)) if (url.endsWith(path)) return full;
+      return url;
+    });
+    const loader = new GLTFLoader(manager);
+    async function model(id, { at = [0, 0, 0], turn = 0, scale = 1, tilt = 0 } = {}) {
+      const root = (await loader.loadAsync(MODELS[id].url)).scene;
+      root.traverse((part) => {
+        if (/_LOD[1-9]/.test(part.name)) part.visible = false; // keep only the most detailed level
+        if (part.isMesh) part.castShadow = part.receiveShadow = true;
+      });
+      root.scale.setScalar(scale);
+      root.position.set(...at);
+      root.rotation.set(tilt, turn, 0);
+      scene.add(root);
+      return root;
+    }
+    const textures = new THREE.TextureLoader();
+    function surface(name, repeat, tint = 0xffffff) {
+      const maps = SURFACES[name];
+      const load = (url, srgb) => {
+        const texture = textures.load(url);
+        texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
+        texture.repeat.set(...(Array.isArray(repeat) ? repeat : [repeat, repeat]));
+        if (srgb) texture.colorSpace = THREE.SRGBColorSpace;
+        texture.anisotropy = 8;
+        return texture;
+      };
+      return new THREE.MeshStandardMaterial({ map: load(maps.map, true), normalMap: load(maps.normal), roughnessMap: load(maps.rough), color: tint });
+    }
+    /** A photographed sky: light, reflections, and the sun where the photo's brightest point is. */
+    async function sky(name, { background = true, intensity = 1 } = {}) {
+      const hdr = await new RGBELoader().setDataType(THREE.FloatType).loadAsync(SURFACES[name]);
+      hdr.mapping = THREE.EquirectangularReflectionMapping;
+      const { data, width, height } = hdr.image;
+      let brightest = 0;
+      let at = 0;
+      for (let i = 0; i < width * height; i++) {
+        const light = data[i * 4] + data[i * 4 + 1] + data[i * 4 + 2];
+        if (light > brightest) (brightest = light), (at = i);
+      }
+      const latitude = (0.5 - (Math.floor(at / width) + 0.5) / height) * Math.PI;
+      const around = (((at % width) + 0.5) / width - 0.5) * Math.PI * 2;
+      scene.environment = pmrem.fromEquirectangular(hdr).texture;
+      scene.environmentIntensity = intensity;
+      if (background) scene.background = hdr;
+      return new THREE.Vector3(Math.cos(around) * Math.cos(latitude), Math.sin(latitude), Math.sin(around) * Math.cos(latitude));
+    }
+    async function soldier(at, turn, scale = 1) {
+      const gltf = await new GLTFLoader().loadAsync("https://cdn.jsdelivr.net/gh/mrdoob/three.js@r170/examples/models/gltf/Soldier.glb");
+      gltf.scene.traverse((part) => part.isMesh && (part.castShadow = true));
+      gltf.scene.position.set(...at);
+      gltf.scene.rotation.y = turn;
+      gltf.scene.scale.setScalar(scale);
+      scene.add(gltf.scene);
+      const mixer = new THREE.AnimationMixer(gltf.scene);
+      mixer.clipAction(gltf.animations.find((clip) => clip.name === "Idle")).play();
+      return mixer;
+    }
+    const sun = new THREE.DirectionalLight(0xffffff, 2);
+    sun.castShadow = true;
+    sun.shadow.mapSize.set(4096, 4096);
+    sun.shadow.bias = -0.0003;
+    sun.shadow.normalBias = 0.02;
+    Object.assign(sun.shadow.camera, { left: -30, right: 30, top: 30, bottom: -30, near: 1, far: 300 });
+    scene.add(sun, sun.target);
+
+    let mixer = null;
+    let water = null;
+    if (which === "pirate") {
+      const toSun = await sky("qwantani_sunset_puresky", { intensity: 1 });
+      renderer.toneMappingExposure = 0.85;
+      sun.color.set(0xffc690);
+      sun.intensity = 3;
+      sun.position.copy(toSun).multiplyScalar(120);
+      scene.fog = new THREE.Fog(0xd8a77e, 200, 2200);
+      // The sea: a glossy surface with moving ripples that reflects the real sky.
+      const ripples = textures.load("https://cdn.jsdelivr.net/npm/three@0.170.0/examples/textures/waternormals.jpg");
+      ripples.wrapS = ripples.wrapT = THREE.RepeatWrapping;
+      ripples.repeat.set(220, 220);
+      const sea = new THREE.Mesh(new THREE.PlaneGeometry(4000, 4000), new THREE.MeshPhysicalMaterial({ color: 0x0a3344, roughness: 0.06, metalness: 0, normalMap: ripples, normalScale: new THREE.Vector2(0.45, 0.45), envMapIntensity: 0.75, clearcoat: 0.6 }));
+      sea.rotation.x = -Math.PI / 2;
+      sea.receiveShadow = true;
+      scene.add(sea);
+      water = { material: { uniforms: { time: { value: 0 } } }, ripples };
+      // Lay the scene out facing the sunset: f metres toward the sun, r metres to its right.
+      const ahead = new THREE.Vector3(toSun.x, 0, toSun.z).normalize();
+      const right = new THREE.Vector3(-ahead.z, 0, ahead.x);
+      const turnToSun = Math.atan2(ahead.x, ahead.z);
+      const place = (f, r, y = 0) => ahead.clone().multiplyScalar(f).addScaledVector(right, r).setY(y).toArray();
+      const sand = new THREE.Mesh(new THREE.CircleGeometry(24, 96), surface("coast_sand_01", 12, 0xe8d8c0));
+      sand.rotation.x = -Math.PI / 2;
+      sand.position.set(...place(-6, 0, 0.06));
+      sand.receiveShadow = true;
+      scene.add(sand);
+      await Promise.all([
+        model("dutch_ship_large_01", { at: place(70, -22, -1.6), turn: turnToSun + 1.9 }),
+        model("dutch_ship_medium", { at: place(150, 50, -1.2), turn: turnToSun - 1.2 }),
+        model("cannon_01", { at: place(3, -1.5, 0.06), turn: turnToSun }),
+        model("Barrel_01", { at: place(1, 3.5, 0.06) }),
+        model("Barrel_02", { at: place(0.2, 4.4, 0.06), turn: 1 }),
+        model("Barrel_01", { at: place(2, 4.6, 0.06), turn: 2 }),
+        model("wooden_crate_02", { at: place(1, -5, 0.06), turn: turnToSun + 0.3 }),
+        model("wooden_crate_02", { at: place(-0.4, -6, 0.06), turn: turnToSun + 1.2 }),
+        model("Lantern_01", { at: place(1, -5, 0.82) }),
+      ]);
+      mixer = await soldier(place(0.5, 1.2, 0.06), turnToSun);
+      camera.position.set(...place(-9, 2.5, 2.2));
+      camera.lookAt(new THREE.Vector3(...place(60, -6, 6)));
+    } else {
+      await sky("lebombo", { background: false, intensity: 0.55 });
+      renderer.toneMappingExposure = 0.95;
+      scene.background = new THREE.Color(0x0d0b09);
+      const W = 8;
+      const D = 6.5;
+      const H = 3;
+      const floor = new THREE.Mesh(new THREE.PlaneGeometry(W, D), surface("dark_wooden_planks", [3, 2.5]));
+      floor.rotation.x = -Math.PI / 2;
+      floor.receiveShadow = true;
+      scene.add(floor);
+      const plaster = surface("painted_plaster_wall", [3, 1.2], 0xe9dfcf);
+      const walls = [
+        [W, H, 0, -D / 2, 0],
+        [D, H, -W / 2, 0, Math.PI / 2],
+        [D, H, W / 2, 0, -Math.PI / 2],
+      ];
+      for (const [w, h, x, z, turn] of walls) {
+        const wall = new THREE.Mesh(new THREE.PlaneGeometry(w, h), plaster);
+        wall.position.set(x, h / 2, z);
+        wall.rotation.y = turn;
+        wall.receiveShadow = true;
+        scene.add(wall);
+      }
+      const ceiling = new THREE.Mesh(new THREE.PlaneGeometry(W, D), new THREE.MeshStandardMaterial({ color: 0xe8e2d8, roughness: 0.95 }));
+      ceiling.rotation.x = Math.PI / 2;
+      ceiling.position.y = H;
+      scene.add(ceiling);
+      // A skirting board along the walls.
+      const skirting = new THREE.MeshStandardMaterial({ color: 0x2b211a, roughness: 0.6 });
+      for (const [w, x, z, turn] of [[W, 0, -D / 2 + 0.01, 0], [D, -W / 2 + 0.01, 0, Math.PI / 2], [D, W / 2 - 0.01, 0, -Math.PI / 2]]) {
+        const board = new THREE.Mesh(new THREE.BoxGeometry(w, 0.12, 0.02), skirting);
+        board.position.set(x, 0.06, z);
+        board.rotation.y = turn;
+        scene.add(board);
+      }
+      await Promise.all([
+        model("Sofa_01", { at: [-0.4, 0, -2.75] }),
+        model("CoffeeTable_01", { at: [-0.4, 0, -1.45] }),
+        model("ArmChair_01", { at: [-2.8, 0, -1.3], turn: Math.PI / 2 - 0.3 }),
+        model("Rockingchair_01", { at: [2.2, 0, -1.1], turn: -Math.PI / 2 - 0.5 }),
+        model("wooden_bookshelf_worn", { at: [3.4, 0, -3.05] }),
+        model("book_encyclopedia_set_01", { at: [3.4, 1.06, -3.05] }),
+        model("vintage_cabinet_01", { at: [-3.75, 0, 1.4], turn: Math.PI / 2 }),
+        model("Television_01", { at: [-3.75, 0.88, 1.4], turn: Math.PI / 2 }),
+        model("potted_plant_01", { at: [-3.6, 0, -2.85] }),
+        model("desk_lamp_arm_01", { at: [0, 0.43, -1.35], turn: 2.4 }),
+        model("Chandelier_01", { at: [-0.4, 2.15, -1.4] }),
+        model("fancy_picture_frame_01", { at: [-0.4, 1.75, -3.22] }),
+      ]);
+      // Warm light from the chandelier, and evening light through a window on the right.
+      const warm = new THREE.PointLight(0xffb468, 9, 10, 1.8);
+      warm.position.set(-0.4, 2.0, -1.4);
+      warm.castShadow = true;
+      warm.shadow.mapSize.set(1024, 1024);
+      scene.add(warm);
+      sun.color.set(0xffd3a0);
+      sun.intensity = 2.2;
+      sun.position.set(12, 5, -2);
+      sun.target.position.set(-2, 0, -1);
+      Object.assign(sun.shadow.camera, { left: -8, right: 8, top: 8, bottom: -8 });
+      mixer = await soldier([0.9, 0, 0.6], -2.7);
+      camera.position.set(2.9, 1.55, 3.0);
+      camera.lookAt(-0.9, 0.9, -1.9);
+    }
+    document.getElementById("note").textContent = "Real scanned models from Poly Haven (CC0), loaded from their servers · photographed sky lighting · contact shadows";
+
+    // Drawing: the scene, soft contact shadows where things meet, then colour output.
+    const composer = new EffectComposer(renderer);
+    composer.addPass(new RenderPass(scene, camera));
+    const ao = new GTAOPass(scene, camera, innerWidth, innerHeight);
+    ao.output = GTAOPass.OUTPUT.Default;
+    ao.blendIntensity = which === "room" ? 1 : 0.8;
+    composer.addPass(ao);
+    composer.addPass(new OutputPass());
+
+    const clock = new THREE.Clock();
+    let frames = 0;
+    renderer.setAnimationLoop(() => {
+      const dt = clock.getDelta();
+      mixer?.update(dt);
+      if (water) water.ripples.offset.x += dt * 0.004;
+      composer.render();
+      if (++frames === 120) console.log("READY");
+    });
+    addEventListener("resize", () => {
+      camera.aspect = innerWidth / innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(innerWidth, innerHeight);
+      composer.setSize(innerWidth, innerHeight);
+    });
+  </script>
+</body>
+</html>

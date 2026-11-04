@@ -52,6 +52,11 @@ const MODEL_ROOT = new URL("../models/", import.meta.url).href;
 const ASSETS = new URL("../assets/polyhaven/", import.meta.url).href;
 const REAL_SKY = `${ASSETS}sky/kloofendal_2k.hdr`;
 const REAL_SURFACES = ["asphalt", "grass", "gravel"];
+// Poly Haven's whole library: models, surfaces and skies, loaded from its servers ("polyhaven/<id>").
+// public/models/polyhaven.json (npm run polyhaven) lists them, with each model's size and files.
+const POLYHAVEN_INDEX = `${MODEL_ROOT}polyhaven.json`;
+const POLYHAVEN_FILES = "https://dl.polyhaven.org/file/ph-assets/";
+const POLYHAVEN = "polyhaven/";
 // Packs whose files store colours the wrong way (screen colours saved as light values), so they
 // would show washed out. Their colours are converted when they load.
 const SCREEN_COLOUR_PACKS = new Set(["racing"]);
@@ -120,6 +125,10 @@ function groundTexture(type) {
 // ---------------------------------------------------------------------------
 
 export async function startKit({ catalog, models = {} }) {
+  // Poly Haven's list (models, surfaces, skies). Without it, "polyhaven/…" names simply aren't found.
+  const polyhaven = await fetch(POLYHAVEN_INDEX)
+    .then((response) => (response.ok ? response.json() : null))
+    .catch(() => null);
   const canvas = document.createElement("canvas");
   canvas.style.cssText = "position:fixed;inset:0;width:100vw;height:100vh;display:block";
   document.body.append(canvas);
@@ -335,24 +344,43 @@ export async function startKit({ catalog, models = {} }) {
   const modelLoader = new GLTFLoader();
   const loading = {};
 
+  /** A Poly Haven model's loader: its files name their textures by a path that lives elsewhere on Poly Haven's servers. */
+  function polyhavenLoader(info) {
+    const manager = new THREE.LoadingManager();
+    manager.setURLModifier((url) => {
+      const path = Object.keys(info.files).find((file) => url.endsWith(file));
+      return path ? POLYHAVEN_FILES + info.files[path] : url;
+    });
+    return new GLTFLoader(manager);
+  }
+
   // Real scanned surfaces: each has colour, bumps (normal map) and roughness. Textures load once.
   const textureLoader = new THREE.TextureLoader();
   const surfaceTextures = {};
+  const isSurface = (name) => REAL_SURFACES.includes(name) || Boolean(polyhaven?.surfaces[name.slice(POLYHAVEN.length)] && name.startsWith(POLYHAVEN));
+  /** The colour, normal and roughness pictures of a surface: the kit's own, or any of Poly Haven's. */
+  function surfaceFiles(name) {
+    if (!name.startsWith(POLYHAVEN)) return ["diff", "normal", "rough"].map((file) => `${ASSETS}${name}/${file}.jpg`);
+    const info = polyhaven.surfaces[name.slice(POLYHAVEN.length)];
+    return [info.map, info.normal, info.rough].map((path) => path && POLYHAVEN_FILES + path);
+  }
   /** repeat: how many copies of the texture fit across one unit of the geometry's UVs. */
   function realSurface(name, repeat, color) {
-    surfaceTextures[name] ??= ["diff", "normal", "rough"].map((file) => {
-      const texture = textureLoader.load(`${ASSETS}${name}/${file}.jpg`);
+    surfaceTextures[name] ??= surfaceFiles(name).map((url, i) => {
+      if (!url) return null;
+      const texture = textureLoader.load(url);
       texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
       texture.anisotropy = renderer.capabilities.getMaxAnisotropy();
-      if (file === "diff") texture.colorSpace = THREE.SRGBColorSpace;
+      if (i === 0) texture.colorSpace = THREE.SRGBColorSpace;
       return texture;
     });
     const [map, normalMap, roughnessMap] = surfaceTextures[name].map((texture) => {
+      if (!texture) return null;
       const copy = texture.clone(); // shares the picture; only the repeat differs
       copy.repeat.set(repeat, repeat);
       return copy;
     });
-    return new THREE.MeshStandardMaterial({ map, normalMap, roughnessMap, color: color ?? 0xffffff, side: THREE.DoubleSide });
+    return new THREE.MeshStandardMaterial({ map, normalMap, roughnessMap, roughness: roughnessMap ? 1 : 0.8, color: color ?? 0xffffff, side: THREE.DoubleSide });
   }
 
   /** The canvas picture for red and white kerbs, or a chequered line. */
@@ -398,9 +426,9 @@ export async function startKit({ catalog, models = {} }) {
     return settings.clearcoat ? new THREE.MeshPhysicalMaterial(settings) : new THREE.MeshStandardMaterial(settings);
   }
 
-  /** The real photographed sky: it lights the scene, shows in reflections, and sets where the sun is. */
-  async function realSky() {
-    const texture = await new RGBELoader().setDataType(THREE.FloatType).loadAsync(REAL_SKY);
+  /** A real photographed sky: it lights the scene, shows in reflections, and sets where the sun is. */
+  async function realSky(url = REAL_SKY) {
+    const texture = await new RGBELoader().setDataType(THREE.FloatType).loadAsync(url);
     texture.mapping = THREE.EquirectangularReflectionMapping;
     // The sun is the brightest point of the photo. The first row of the picture is the top of the sky.
     const { data, width, height } = texture.image;
@@ -491,9 +519,16 @@ export async function startKit({ catalog, models = {} }) {
     /**
      * Sky, light and fog: "day", "sunset", "night", "space", "underwater" or "indoor", or "real" for a
      * real photographed sky (await it: it loads a picture of the sky, and the sun is placed where it is in the photo).
+     * "polyhaven/<id>" is any of Poly Haven's photographed skies, such as "polyhaven/qwantani_sunset_puresky".
      */
     sky(preset = "day") {
       if (preset === "real") return realSky();
+      if (preset.startsWith(POLYHAVEN)) {
+        const id = preset.slice(POLYHAVEN.length);
+        if (polyhaven?.skies[id]) return realSky(`${POLYHAVEN_FILES}HDRIs/hdr/2k/${id}_2k.hdr`);
+        console.warn(`kit.sky: unknown Poly Haven sky "${id}"`);
+        return realSky();
+      }
       const s = SKIES[preset] ?? SKIES.day;
       for (const part of skyParts) scene.remove(part);
       scene.fog = s.fog === null ? null : new THREE.Fog(s.fog, 90, 420);
@@ -541,14 +576,15 @@ export async function startKit({ catalog, models = {} }) {
     },
 
     /**
-     * A flat ground: grass, asphalt and gravel are real scanned surfaces; sand, snow, dirt, stone, tiles,
-     * planks, road, water, lava, ice and metal are drawn.
+     * A flat ground: grass, asphalt and gravel are real scanned surfaces, and so is any of Poly Haven's
+     * ("polyhaven/<id>", such as "polyhaven/coast_sand_01"); sand, snow, dirt, stone, tiles, planks,
+     * road, water, lava, ice and metal are drawn. metres is how far one copy of the surface reaches.
      */
-    ground({ type = "grass", size = 200, at = [0, 0, 0] } = {}) {
+    ground({ type = "grass", size = 200, at = [0, 0, 0], metres } = {}) {
       let material;
-      if (REAL_SURFACES.includes(type)) {
+      if (isSurface(type)) {
         // The scanned grass is a dry field; a little green makes it look watered and mown.
-        material = realSurface(type, size / (type === "grass" ? 8 : 4), type === "grass" ? 0x9fd27c : undefined);
+        material = realSurface(type, size / (metres ?? (type === "grass" ? 8 : 4)), type === "grass" ? 0x9fd27c : undefined);
       } else {
         const map = groundTexture(type);
         map.repeat.set(size / 4, size / 4);
@@ -598,21 +634,32 @@ export async function startKit({ catalog, models = {} }) {
     things: Object.keys(catalog),
 
     /**
-     * A real 3D model made by an artist, from public/models (see models.json). Async: await it.
+     * A real 3D model made by an artist: one from public/models (see manifest.json), or a scanned
+     * Poly Haven model, "polyhaven/<id>", loaded from Poly Haven's servers. Async: await it.
      * It stands with the middle of its base at at. size sets the length of its longest side in
-     * metres; otherwise scale multiplies its own size.
+     * metres; otherwise scale multiplies its own size (Poly Haven models are already real size).
      */
     async model(name, { at = [0, 0, 0], turn = 0, size, scale = 1, solid = true } = {}) {
-      const info = models[name];
+      const scanned = name.startsWith(POLYHAVEN) ? polyhaven?.models[name.slice(POLYHAVEN.length)] : null;
+      let info = scanned ?? models[name];
       const group = new THREE.Group();
-      if (!info) {
-        console.warn(`kit.model: unknown model "${name}"`);
-      } else {
-        loading[name] ??= modelLoader.loadAsync(`${MODEL_ROOT}${info.file ?? `${name}.glb`}`).then((gltf) => {
-          prepareModel(gltf.scene, name.split("/")[0]);
+      let original = null;
+      if (!info) console.warn(`kit.model: unknown model "${name}"`);
+      else {
+        loading[name] ??= (scanned ? polyhavenLoader(scanned).loadAsync(POLYHAVEN_FILES + scanned.gltf) : modelLoader.loadAsync(`${MODEL_ROOT}${info.file ?? `${name}.glb`}`)).then((gltf) => {
+          // Scanned models come with their own real materials; keep only their most detailed version.
+          if (scanned) gltf.scene.traverse((part) => /_LOD[1-9]/.test(part.name) && (part.visible = false));
+          else prepareModel(gltf.scene, name.split("/")[0]);
           return gltf;
         });
-        const original = (await loading[name]).scene;
+        try {
+          original = (await loading[name]).scene;
+        } catch (error) {
+          console.warn(`kit.model: "${name}" didn't load: ${error.message}`); // a network problem shouldn't stop the game
+          info = null;
+        }
+      }
+      if (info && original) {
         const copy = original.clone(true);
         copy.traverse((part) => part.isMesh && (part.castShadow = part.receiveShadow = true));
         const factor = size ? size / Math.max(...info.size) : scale;
@@ -632,12 +679,12 @@ export async function startKit({ catalog, models = {} }) {
     models,
 
     /**
-     * A real scanned surface ("asphalt", "grass" or "gravel") for your own geometry. Its UVs should
-     * be in metres: one copy of the texture covers `metres` metres.
+     * A real scanned surface ("asphalt", "grass", "gravel" or any Poly Haven surface, "polyhaven/<id>")
+     * for your own geometry. Its UVs should be in metres: one copy of the texture covers `metres` metres.
      */
     material(name, { metres = 4, color } = {}) {
-      if (!REAL_SURFACES.includes(name)) console.warn(`kit.material: unknown surface "${name}"`);
-      return realSurface(REAL_SURFACES.includes(name) ? name : "asphalt", 1 / metres, color);
+      if (!isSurface(name)) console.warn(`kit.material: unknown surface "${name}"`);
+      return realSurface(isSurface(name) ? name : "asphalt", 1 / metres, color);
     },
 
     /**

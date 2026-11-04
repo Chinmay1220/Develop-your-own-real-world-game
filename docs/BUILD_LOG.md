@@ -34,6 +34,7 @@ Every result below comes from a real run. Nothing is invented.
 | [25](#step-25-metas-ai-inside-every-game-world-model-minds-and-learning) | Meta's AI inside every game: world model, minds and learning |
 | [26](#step-26-no-engine-a-game-with-no-game-code) | No Engine: a game with no game code |
 | [27](#step-27-rewind-a-world-model-that-runs-time-backwards) | Rewind: a world model that runs time backwards |
+| [28](#step-28-real-scanned-models-surfaces-and-skies-in-every-game-poly-haven) | Real scanned models, surfaces and skies in every game (Poly Haven) |
 | [Final](#final-check) | Final check, and how to repeat it |
 | [Next](#not-done-yet) | Not done yet |
 
@@ -1206,6 +1207,40 @@ Fixed along the way:
 - **Tests:** 2 new (cleaning the investigation; painting backwards from the photo with the calm-words retry). Now 41, all passing.
 - **Not done (for time):** follow-up questions by voice, a second physics check by Muse Spark, SAM 3.1 outlines of the evidence, and video input.
 
+## Step 28: Real scanned models, surfaces and skies in every game (Poly Haven)
+
+**Request (Nov 4):** back to the game maker, "building game with high graphics". The user chose "better 3D models", then said to do both (real models and realistic people), to show the final product, and to commit and push step by step.
+
+**What was checked first:**
+- **Poly Haven has 521 scanned models (CC0).** 468 have at most 150,000 polygons and are game-ready.
+- **The rest are film-quality:** the pine tree has 17 million polygons and is a 950 MB download.
+- **Its file server allows cross-site loading** (`Access-Control-Allow-Origin: *`), so games can load straight from it and nothing big is stored here.
+- **One catch:** each model's glTF names its textures by a relative path that doesn't exist (404), so the loader has to redirect them.
+
+**What was built:**
+
+| Part | What it does |
+|---|---|
+| `npm run polyhaven` (`src/tools/polyhaven.ts`) | Indexes the library into `public/models/polyhaven.json` (730 KB): **466 models** (with polygons, download size, file map, and real size in metres worked out from each glTF's accessor bounds and node transforms, LOD0 only), **863 surfaces** (colour, normal and roughness maps) and **997 skies**. |
+| `kit.model("polyhaven/<id>")` | Loads from `dl.polyhaven.org` with the textures redirected. It keeps only LOD0, keeps the real materials, and puts the base at `at` at real size. A model that fails to load logs a warning instead of stopping the game. |
+| `kit.sky("polyhaven/<id>")` | Any of the 997 photographed skies (2k HDR), with the sun placed at the photo's brightest point. |
+| `kit.ground({ type: "polyhaven/<id>", metres })`, `kit.material("polyhaven/<id>")` | Any of the 863 scanned surfaces. |
+| The sealed frame (`sandbox.js`) | Its content policy now allows `https://dl.polyhaven.org` for files and images. The API is still unreachable. |
+| The writer | Gets the 466 models grouped by kind with real sizes (heavy ones marked *), plus curated surfaces and skies, and is told to prefer them over shapes. The instructions grew to about 40,000 characters. |
+
+**Checks:**
+- **Two look tests** (`public/lab/realistic.html`): a pirate cove and a living room.
+  - The room looked real: scanned furniture, a plaster wall surface, real interior sky light, and contact shadows (GTAO).
+  - The pirate cove was weaker: the sea and sky looked washed out.
+- **A hand-made game through the kit in the sealed frame** loaded the sky, 9 models and two surfaces with no errors.
+- **Tests:** 1 new (model size from glTF bounds, ignoring LOD1). Now 42, all passing.
+
+| Through the kit, in the sealed frame | The pirate look test |
+|---|---|
+| ![Room](images/polyhaven-kit-room.png) | ![Pirate cove](images/polyhaven-look-pirate.png) |
+
+**Still missing:** realistic people (the only free animated characters are the sci-fi soldier and a mannequin), game-weight trees, and modern cars. People come next, from Microsoft Rocketbox (MIT).
+
 ## Final check
 
 Run these from the project folder to repeat the checks:
@@ -1213,7 +1248,7 @@ Run these from the project folder to repeat the checks:
 ```bash
 npm install
 npm run typecheck   # result: no errors
-npm test            # result: 41 tests, 41 passed, 0 failed
+npm test            # result: 42 tests, 42 passed, 0 failed
 npm run demo        # result: rounds end escaped, caught, escaped, caught (5, 5, 7 and 6 steps)
 npm run api:check   # needs .env; result: key works, 4 of 4 game models available
 npm run api:try     # needs .env; plays round 1 on the real models (a few cents)

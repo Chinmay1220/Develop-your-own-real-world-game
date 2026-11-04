@@ -43,6 +43,32 @@ for (const [name, { size }] of Object.entries(modelInfo)) {
 }
 const modelList = [...packs].map(([pack, files]) => `  "${pack}/…": ${files.join(", ")}`).join("\n");
 
+// Poly Haven's real scanned models, surfaces and skies (public/models/polyhaven.json, from npm run polyhaven).
+interface PolyHaven {
+  models: Record<string, { size: number[]; polygons: number; categories: string[] }>;
+  surfaces: Record<string, { categories: string[] }>;
+  skies: Record<string, { categories: string[] }>;
+}
+const POLYHAVEN_INDEX = join(ROOT, "public", "models", "polyhaven.json");
+const polyhaven = existsSync(POLYHAVEN_INDEX) ? (JSON.parse(readFileSync(POLYHAVEN_INDEX, "utf8")) as PolyHaven) : null;
+const MODEL_GROUPS = ["furniture", "lighting", "decorative", "electronics", "appliances", "office", "tools", "industrial", "containers", "food", "dishes", "plants", "rocks", "trees", "nature", "ships", "structures", "weapons", "props"];
+/** Ids grouped by their first category in the order given, each with an optional note. */
+function grouped<T extends { categories: string[] }>(items: Record<string, T>, order: string[], note: (id: string, item: T) => string, most = Infinity): string {
+  const groups = new Map<string, string[]>();
+  for (const [id, item] of Object.entries(items)) {
+    const group = order.find((category) => item.categories.includes(category));
+    if (group) groups.set(group, [...(groups.get(group) ?? []), note(id, item)]);
+  }
+  return order
+    .filter((group) => groups.has(group))
+    .map((group) => `  ${group}: ${groups.get(group)!.slice(0, most).join(", ")}`)
+    .join("\n");
+}
+const scannedModels = polyhaven ? grouped(polyhaven.models, MODEL_GROUPS, (id, model) => `${id} ${model.size.map((value) => value.toFixed(1)).join("×")}${model.polygons > 50_000 ? "*" : ""}`) : "";
+const scannedSurfaces = polyhaven ? grouped(polyhaven.surfaces, ["floor", "wood", "brick", "plaster", "concrete", "tiles", "stone", "metal", "fabric", "road", "terrain", "sand", "snow", "rock", "roofing", "man made"], (id) => id, 14) : "";
+// Sky-only photos first (they fit any outdoor game), then the rest by kind; an indoor sky never counts as a sunset.
+const scannedSkies = polyhaven ? grouped(polyhaven.skies, ["pure skies", "indoor", "studio", "night", "sunrise-sunset", "overcast", "clear", "urban", "nature"], (id) => id, 14) : "";
+
 export const INSTRUCTIONS = `You are a game developer. A player describes a game in their own words; it is often spoken, so it can be messy. You write that game: a complete, small, polished 3D game that runs in the browser.
 
 Any kind of game is welcome: racing, platformer, puzzle, shooter, sports, farming, survival, adventure, stealth, rhythm, party, simulation, and anything else. Make the game the player asked for, with their characters, names, setting, mood and rules. Never turn it into a different kind of game. Fill in what they left out with whatever makes it most fun, and keep it small enough to enjoy in a few minutes. Give it a clear goal and a little challenge that grows.
@@ -55,10 +81,10 @@ The game must:
 - look as real as the kit allows. The most realistic parts come first:
   - kit.vehicle("f1") for race cars;
   - kit.road for tracks and roads;
-  - await kit.sky("real") with real "grass" ground outdoors;
-  - "realistic/…" models, such as the concrete barrier;
+  - a real photographed sky: await kit.sky("polyhaven/<sky>") (or kit.sky("real")), with a real scanned ground ("polyhaven/<surface>", "grass", "asphalt" or "gravel");
+  - real scanned objects from Poly Haven (kit.model("polyhaven/<id>")) for furniture, props, tools, barrels, crates, lamps, food, plants, rocks, ships, cannons and everything else they cover;
   - then the other models listed below (kit.model) for everything that has one, such as grandstands, trees, flags, tents and garages.
-  Never build those from shapes, even when the player describes how they look: the description tells you which car, model and colours to choose. Build from shapes only what has nothing better;
+  Never build those from shapes, even when the player describes how they look: the description tells you which car, model and colours to choose. Build from shapes only what has nothing better, and give your own walls and floors real scanned surfaces with kit.material("polyhaven/<surface>");
 - come alive with Meta's AI (see META'S AI INSIDE THE GAME below): make a kit.world(...) in every game, so the player can try anything by typing or saying it, and give rivals, enemies and other characters who should outsmart the player a kit.mind(...);
 - start playing at once, with how to play shown by kit.hud.controls(...);
 - show the score, time, lives or whatever matters with kit.hud.set(...), and end with kit.win(...) or kit.lose(...); R restarts, and the kit handles that;
@@ -76,9 +102,11 @@ Keys and mouse:
 - kit.pointer.x and .y (from -1 to 1), .down, .clicked (this frame only), .ray() (a THREE.Raycaster), .groundPoint(y = 0) (a THREE.Vector3 on the ground, or null).
 World:
 - kit.sky(preset): "day" (the default), "sunset", "night", "space", "underwater" or "indoor". It sets the background, fog and lights, including a sun with shadows.
-- await kit.sky("real") instead gives a real photographed sky, with clouds and true sunlight, reflections and shadows. Use it for every realistic outdoor game in daylight.
-- kit.ground({ type, size, at }): a flat square, 200 m by default. "grass", "asphalt" and "gravel" are real scanned surfaces. "sand", "snow", "dirt", "stone", "tiles", "planks", "road", "water", "lava", "ice" and "metal" are drawn. Returns the mesh.
-- kit.material(name, { metres, color }) gives the real "asphalt", "grass" or "gravel" for your own geometry; its UVs must be in metres.
+- await kit.sky("real") or await kit.sky("polyhaven/<sky>") instead gives a real photographed 360° sky, with true light, reflections and the sun (and its shadows) where it is in the photo. Use one for every realistic game. Pick a sky that fits the time and place; "_puresky" skies show only sky, the others show a real place at the horizon. Indoors, an indoor sky lights the room realistically (your walls hide the photo). Poly Haven skies:
+${scannedSkies || "  (none listed)"}
+- kit.ground({ type, size, at, metres }): a flat square, 200 m by default. "grass", "asphalt", "gravel" and every Poly Haven surface ("polyhaven/<surface>") are real scanned surfaces; metres is how far one copy reaches. "sand", "snow", "dirt", "stone", "tiles", "planks", "road", "water", "lava", "ice" and "metal" are only drawn, so prefer a real surface. Returns the mesh.
+- kit.material(name, { metres, color }) gives a real scanned surface ("asphalt", "grass", "gravel" or "polyhaven/<surface>") for your own geometry such as walls, floors and paths; its UVs must be in metres (BoxGeometry and PlaneGeometry UVs go 0 to 1, so set metres to the size of the face, or scale the UVs). Poly Haven surfaces, by kind (there are more of each):
+${scannedSurfaces || "  (none listed)"}
 - kit.road(points, { width, closed, kerbs, startLine }) builds a real race track or road through [[x, z], ...]: real asphalt, white edge lines, red and white kerbs with gravel at the corners, and a chequered start line at the first point. Always use it for tracks and roads instead of building your own surface.
   - It returns road with road.length (metres), road.pointAt(m) and road.tangentAt(m) (THREE.Vector3s, m metres from the start, going round again after a lap), and road.nearest(position).
   - road.nearest gives { offset, distance, along, progress, onRoad }: offset is the sideways distance from the centre line, along the metres from the start. Use it for laps, positions, rivals following the racing line, and slowing down off the road.
@@ -95,6 +123,8 @@ Real 3D models: made by artists, so they look far better than anything built fro
 - Models in one pack share a scale, so use the same scale for all of them. For "racing/…", scale 6 makes the race car about 8 m long and a road tile 6 m wide. Road tiles fit together edge to edge: a straight is 1×1 tile and a large corner is 2×2 tiles.
 - Models, with their width × height × depth at scale 1:
 ${modelList || "  (none installed)"}
+- Real scanned models from Poly Haven: photographed real objects with real materials, at their real size in metres (leave scale at 1). await kit.model("polyhaven/<id>", { at, turn }). They load from the internet, so load the ones you need together with await Promise.all([...]) while the game starts, and reuse the same id for copies (copies are cheap). Ids marked * are heavy (over 50,000 polygons): use at most 3 of those. Width × height × depth:
+${scannedModels || "  (none installed)"}
 - To paint a model, change its materials: model.traverse((part) => { if (part.isMesh) ... }). Make clones of the materials first.
 - kit.remove(object) takes something out of the game.
 Characters:
