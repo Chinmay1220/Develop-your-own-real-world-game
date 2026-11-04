@@ -1,0 +1,22 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><title>Measure models</title>
+<script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/"}}</script>
+</head><body><script type="module">
+// Measures every model listed in index.json and prints "MODELS {...}" for npm run models to save.
+import * as THREE from "three";
+import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
+const names = await (await fetch("index.json")).json();
+const loader = new GLTFLoader();
+const sizes = {};
+for (const name of names) {
+  try {
+    const gltf = await loader.loadAsync(name); // a file path such as racing/raceCarRed.glb
+    const box = new THREE.Box3().setFromObject(gltf.scene);
+    const round = (value) => Math.round(value * 1000) / 1000;
+    sizes[name] = { size: box.getSize(new THREE.Vector3()).toArray().map(round), min: box.min.toArray().map(round) };
+  } catch (error) {
+    console.log(`SKIPPED ${name}: ${error.message}`);
+  }
+}
+console.log(`MODELS ${JSON.stringify(sizes)}`);
+</script></body></html>

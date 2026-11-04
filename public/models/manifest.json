@@ -1,0 +1,1584 @@
+{
+ "racing/bannerTowerGreen": {
+  "size": [
+   0.385,
+   1.246,
+   0.385
+  ],
+  "min": [
+   -0.35,
+   -0.01,
+   -1.035
+  ],
+  "file": "racing/bannerTowerGreen.glb",
+  "label": "banner tower green"
+ },
+ "racing/bannerTowerRed": {
+  "size": [
+   0.385,
+   1.246,
+   0.385
+  ],
+  "min": [
+   -0.35,
+   -0.01,
+   -1.035
+  ],
+  "file": "racing/bannerTowerRed.glb",
+  "label": "banner tower red"
+ },
+ "racing/barrierRed": {
+  "size": [
+   0.25,
+   0.131,
+   0.123
+  ],
+  "min": [
+   -0.35,
+   -0.01,
+   -0.773
+  ],
+  "file": "racing/barrierRed.glb",
+  "label": "barrier red"
+ },
+ "racing/barrierWall": {
+  "size": [
+   1,
+   0.131,
+   0.123
+  ],
+  "min": [
+   -0.35,
+   -0.01,
+   -0.773
+  ],
+  "file": "racing/barrierWall.glb",
+  "label": "barrier wall"
+ },
+ "racing/barrierWhite": {
+  "size": [
+   0.25,
+   0.131,
+   0.123
+  ],
+  "min": [
+   -0.35,
+   -0.01,
+   -0.773
+  ],
+  "file": "racing/barrierWhite.glb",
+  "label": "barrier white"
+ },
+ "racing/billboard": {
+  "size": [
+   1,
+   1,
+   0.476
+  ],
+  "min": [
+   -0.414,
+   -0.01,
+   -1.086
+  ],
+  "file": "racing/billboard.glb",
+  "label": "billboard"
+ },
+ "racing/billboardDouble_exclusive": {
+  "size": [
+   1,
+   1,
+   0.364
+  ],
+  "min": [
+   -0.414,
+   -0.01,
+   -0.974
+  ],
+  "file": "racing/billboardDouble_exclusive.glb",
+  "label": "billboard double"
+ },
+ "racing/billboardLow": {
+  "size": [
+   1,
+   0.69,
+   0.476
+  ],
+  "min": [
+   -0.414,
+   -0.01,
+   -1.086
+  ],
+  "file": "racing/billboardLow.glb",
+  "label": "billboard low"
+ },
+ "racing/billboardLower": {
+  "size": [
+   0.5,
+   0.28,
+   0.072
+  ],
+  "min": [
+   -0.35,
+   -0.04,
+   -0.722
+  ],
+  "file": "racing/billboardLower.glb",
+  "label": "billboard lower"
+ },
+ "racing/camera_exclusive": {
+  "size": [
+   0.107,
+   0.409,
+   0.264
+  ],
+  "min": [
+   -0.35,
+   -0.01,
+   -0.827
+  ],
+  "file": "racing/camera_exclusive.glb",
+  "label": "camera"
+ },
+ "racing/fenceCurved": {
+  "size": [
+   1,
+   0.82,
+   0.32
+  ],
+  "min": [
+   -0.35,
+   -0.01,
+   -0.886
+  ],
+  "file": "racing/fenceCurved.glb",
+  "label": "fence curved"
+ },
+ "racing/fenceStraight": {
+  "size": [
+   1,
+   0.5,
+   0.034
+  ],
+  "min": [
+   -0.35,
+   -0.01,
+   -0.684
+  ],
+  "file": "racing/fenceStraight.glb",
+  "label": "fence straight"
+ },
+ "racing/flagCheckers": {
+  "size": [
+   0.197,
+   1.25,
+   0.035
+  ],
+  "min": [
+   -0.35,
+   -0.01,
+   -0.685
+  ],
+  "file": "racing/flagCheckers.glb",
+  "label": "flag checkers"
+ },
+ "racing/flagCheckersSmall": {
+  "size": [
+   0.19,
+   0.3,
+   0.035
+  ],
+  "min": [
+   -0.35,
+   -0.01,
+   -0.678
+  ],
+  "file": "racing/flagCheckersSmall.glb",
+  "label": "flag checkers small"
+ },
+ "racing/flagGreen": {
+  "size": [
+   0.197,
+   1.25,
+   0.035
+  ],
+  "min": [
+   -0.35,
+   -0.01,
+   -0.685
+  ],
+  "file": "racing/flagGreen.glb",
+  "label": "flag green"
+ },
+ "racing/flagRed": {
+  "size": [
+   0.197,
+   1.25,
+   0.035
+  ],
+  "min": [
+   -0.35,
+   -0.01,
+   -0.685
+  ],
+  "file": "racing/flagRed.glb",
+  "label": "flag red"
+ },
+ "racing/flagTankco": {
+  "size": [
+   0.197,
+   1.25,
+   0.035
+  ],
+  "min": [
+   -0.35,
+   -0.01,
+   -0.685
+  ],
+  "file": "racing/flagTankco.glb",
+  "label": "flag tankco"
+ },
+ "racing/grandStand": {
+  "size": [
+   1,
+   0.896,
+   1
+  ],
+  "min": [
+   -0.35,
+   -0.01,
+   -1.65
+  ],
+  "file": "racing/grandStand.glb",
+  "label": "grand stand"
+ },
+ "racing/grandStandAwning": {
+  "size": [
+   1,
+   1.385,
+   1
+  ],
+  "min": [
+   -0.35,
+   -0.01,
+   -1.65
+  ],
+  "file": "racing/grandStandAwning.glb",
+  "label": "grand stand awning"
+ },
+ "racing/grandStandCovered": {
+  "size": [
+   1,
+   1.186,
+   1.02
+  ],
+  "min": [
+   -0.35,
+   -0.01,
+   -1.65
+  ],
+  "file": "racing/grandStandCovered.glb",
+  "label": "grand stand covered"
+ },
+ "racing/grandStandCoveredRound": {
+  "size": [
+   1.637,
+   1.186,
+   1.637
+  ],
+  "min": [
+   -0.35,
+   -0.01,
+   -1.65
+  ],
+  "file": "racing/grandStandCoveredRound.glb",
+  "label": "grand stand covered round"
+ },
+ "racing/grandStandRound": {
+  "size": [
+   1.637,
+   0.896,
+   1.637
+  ],
+  "min": [
+   -0.35,
+   -0.01,
+   -1.65
+  ],
+  "file": "racing/grandStandRound.glb",
+  "label": "grand stand round"
+ },
+ "racing/grass": {
+  "size": [
+   1,
+   0,
+   1
+  ],
+  "min": [
+   -0.35,
+   -0.01,
+   -1.65
+  ],
+  "file": "racing/grass.glb",
+  "label": "grass"
+ },
+ "racing/lightColored": {
+  "size": [
+   0.071,
+   0.646,
+   0.109
+  ],
+  "min": [
+   -0.385,
+   -0.01,
+   -0.668
+  ],
+  "file": "racing/lightColored.glb",
+  "label": "light colored"
+ },
+ "racing/lightPostLarge": {
+  "size": [
+   0.38,
+   0.796,
+   0.097
+  ],
+  "min": [
+   -0.54,
+   -0.01,
+   -0.668
+  ],
+  "file": "racing/lightPostLarge.glb",
+  "label": "light post large"
+ },
+ "racing/lightPostModern": {
+  "size": [
+   0.049,
+   0.781,
+   0.178
+  ],
+  "min": [
+   -0.375,
+   -0.01,
+   -0.668
+  ],
+  "file": "racing/lightPostModern.glb",
+  "label": "light post modern"
+ },
+ "racing/lightPost_exclusive": {
+  "size": [
+   0.2,
+   0.796,
+   0.097
+  ],
+  "min": [
+   -0.45,
+   -0.01,
+   -0.668
+  ],
+  "file": "racing/lightPost_exclusive.glb",
+  "label": "light post"
+ },
+ "racing/lightRed": {
+  "size": [
+   0.071,
+   0.713,
+   0.109
+  ],
+  "min": [
+   -0.385,
+   -0.01,
+   -0.668
+  ],
+  "file": "racing/lightRed.glb",
+  "label": "light red"
+ },
+ "racing/lightRedDouble": {
+  "size": [
+   0.142,
+   0.683,
+   0.109
+  ],
+  "min": [
+   -0.421,
+   -0.01,
+   -0.668
+  ],
+  "file": "racing/lightRedDouble.glb",
+  "label": "light red double"
+ },
+ "racing/overhead": {
+  "size": [
+   1.26,
+   0.668,
+   0.19
+  ],
+  "min": [
+   -0.48,
+   -0.01,
+   -0.65
+  ],
+  "file": "racing/overhead.glb",
+  "label": "overhead"
+ },
+ "racing/overheadLights": {
+  "size": [
+   1.26,
+   0.694,
+   0.19
+  ],
+  "min": [
+   -0.48,
+   -0.01,
+   -0.65
+  ],
+  "file": "racing/overheadLights.glb",
+  "label": "overhead lights"
+ },
+ "racing/overheadRound": {
+  "size": [
+   1.867,
+   0.933,
+   0.33
+  ],
+  "min": [
+   -0.783,
+   -0.01,
+   -0.98
+  ],
+  "file": "racing/overheadRound.glb",
+  "label": "overhead round"
+ },
+ "racing/overheadRoundColored": {
+  "size": [
+   1.867,
+   0.933,
+   0.33
+  ],
+  "min": [
+   -0.35,
+   -0.01,
+   -0.98
+  ],
+  "file": "racing/overheadRoundColored.glb",
+  "label": "overhead round colored"
+ },
+ "racing/pitsGarage": {
+  "size": [
+   1,
+   0.7,
+   1.09
+  ],
+  "min": [
+   -0.35,
+   -0.01,
+   -1.65
+  ],
+  "file": "racing/pitsGarage.glb",
+  "label": "pits garage"
+ },
+ "racing/pitsGarageClosed": {
+  "size": [
+   1,
+   0.7,
+   1.09
+  ],
+  "min": [
+   -0.35,
+   -0.01,
+   -1.65
+  ],
+  "file": "racing/pitsGarageClosed.glb",
+  "label": "pits garage closed"
+ },
+ "racing/pitsGarageCorner": {
+  "size": [
+   1.05,
+   0.7,
+   1
+  ],
+  "min": [
+   -0.35,
+   -0.01,
+   -1.65
+  ],
+  "file": "racing/pitsGarageCorner.glb",
+  "label": "pits garage corner"
+ },
+ "racing/pitsOffice": {
+  "size": [
+   1,
+   0.51,
+   1.04
+  ],
+  "min": [
+   -0.35,
+   -0.01,
+   -1.65
+  ],
+  "file": "racing/pitsOffice.glb",
+  "label": "pits office"
+ },
+ "racing/pitsOfficeCorner": {
+  "size": [
+   1.04,
+   0.51,
+   1.04
+  ],
+  "min": [
+   -0.35,
+   -0.01,
+   -1.65
+  ],
+  "file": "racing/pitsOfficeCorner.glb",
+  "label": "pits office corner"
+ },
+ "racing/pitsOfficeRoof": {
+  "size": [
+   1,
+   0.852,
+   1.04
+  ],
+  "min": [
+   -0.35,
+   -0.01,
+   -1.65
+  ],
+  "file": "racing/pitsOfficeRoof.glb",
+  "label": "pits office roof"
+ },
+ "racing/pylon": {
+  "size": [
+   0.12,
+   0.132,
+   0.12
+  ],
+  "min": [
+   -0.41,
+   -0.01,
+   -0.71
+  ],
+  "file": "racing/pylon.glb",
+  "label": "pylon"
+ },
+ "racing/raceCarGreen": {
+  "size": [
+   0.729,
+   0.397,
+   1.346
+  ],
+  "min": [
+   -0.714,
+   -0.034,
+   -1.336
+  ],
+  "file": "racing/raceCarGreen.glb",
+  "label": "race car green"
+ },
+ "racing/raceCarOrange": {
+  "size": [
+   0.729,
+   0.397,
+   1.346
+  ],
+  "min": [
+   -0.714,
+   -0.034,
+   -1.336
+  ],
+  "file": "racing/raceCarOrange.glb",
+  "label": "race car orange"
+ },
+ "racing/raceCarRed": {
+  "size": [
+   0.729,
+   0.397,
+   1.346
+  ],
+  "min": [
+   -0.714,
+   -0.034,
+   -1.336
+  ],
+  "file": "racing/raceCarRed.glb",
+  "label": "race car red"
+ },
+ "racing/raceCarWhite": {
+  "size": [
+   0.729,
+   0.397,
+   1.346
+  ],
+  "min": [
+   -0.714,
+   -0.034,
+   -1.336
+  ],
+  "file": "racing/raceCarWhite.glb",
+  "label": "race car white"
+ },
+ "racing/radarEquipment": {
+  "size": [
+   0.589,
+   0.543,
+   0.413
+  ],
+  "min": [
+   -0.189,
+   -0.01,
+   -1.27
+  ],
+  "file": "racing/radarEquipment.glb",
+  "label": "radar equipment"
+ },
+ "racing/rail": {
+  "size": [
+   1,
+   0.16,
+   0.05
+  ],
+  "min": [
+   -0.35,
+   -0.01,
+   -0.65
+  ],
+  "file": "racing/rail.glb",
+  "label": "rail"
+ },
+ "racing/railDouble": {
+  "size": [
+   1,
+   0.28,
+   0.05
+  ],
+  "min": [
+   -0.35,
+   -0.01,
+   -0.65
+  ],
+  "file": "racing/railDouble.glb",
+  "label": "rail double"
+ },
+ "racing/ramp": {
+  "size": [
+   0.55,
+   0.33,
+   0.73
+  ],
+  "min": [
+   -0.35,
+   -0.01,
+   -1.38
+  ],
+  "file": "racing/ramp.glb",
+  "label": "ramp"
+ },
+ "racing/roadBump": {
+  "size": [
+   1,
+   0.1,
+   2
+  ],
+  "min": [
+   -0.35,
+   -0.01,
+   -2.65
+  ],
+  "file": "racing/roadBump.glb",
+  "label": "road bump"
+ },
+ "racing/roadCornerBridgeLarge": {
+  "size": [
+   2,
+   0.127,
+   2
+  ],
+  "min": [
+   -0.35,
+   -0.01,
+   -2.65
+  ],
+  "file": "racing/roadCornerBridgeLarge.glb",
+  "label": "road corner bridge large"
+ },
+ "racing/roadCornerBridgeLarger": {
+  "size": [
+   3,
+   0.127,
+   3
+  ],
+  "min": [
+   -0.35,
+   -0.01,
+   -3.65
+  ],
+  "file": "racing/roadCornerBridgeLarger.glb",
+  "label": "road corner bridge larger"
+ },
+ "racing/roadCornerBridgeSmall": {
+  "size": [
+   1,
+   0.127,
+   1
+  ],
+  "min": [
+   -0.35,
+   -0.01,
+   -1.65
+  ],
+  "file": "racing/roadCornerBridgeSmall.glb",
+  "label": "road corner bridge small"
+ },
+ "racing/roadCornerLarge": {
+  "size": [
+   2,
+   0.02,
+   2
+  ],
+  "min": [
+   -0.35,
+   -0.01,
+   -2.65
+  ],
+  "file": "racing/roadCornerLarge.glb",
+  "label": "road corner large"
+ },
+ "racing/roadCornerLargeBorder": {
+  "size": [
+   2.21,
+   0.02,
+   2.21
+  ],
+  "min": [
+   -0.56,
+   -0.01,
+   -2.86
+  ],
+  "file": "racing/roadCornerLargeBorder.glb",
+  "label": "road corner large border"
+ },
+ "racing/roadCornerLargeBorderInner": {
+  "size": [
+   1,
+   0.02,
+   1
+  ],
+  "min": [
+   0.65,
+   -0.01,
+   -1.65
+  ],
+  "file": "racing/roadCornerLargeBorderInner.glb",
+  "label": "road corner large border inner"
+ },
+ "racing/roadCornerLarger": {
+  "size": [
+   3,
+   0.02,
+   3
+  ],
+  "min": [
+   -0.35,
+   -0.01,
+   -3.65
+  ],
+  "file": "racing/roadCornerLarger.glb",
+  "label": "road corner larger"
+ },
+ "racing/roadCornerLargerBorder": {
+  "size": [
+   3.21,
+   0.02,
+   3.21
+  ],
+  "min": [
+   -0.56,
+   -0.01,
+   -3.86
+  ],
+  "file": "racing/roadCornerLargerBorder.glb",
+  "label": "road corner larger border"
+ },
+ "racing/roadCornerLargerBorderInner": {
+  "size": [
+   2,
+   0.02,
+   2
+  ],
+  "min": [
+   0.65,
+   -0.01,
+   -2.65
+  ],
+  "file": "racing/roadCornerLargerBorderInner.glb",
+  "label": "road corner larger border inner"
+ },
+ "racing/roadCornerLargerSand": {
+  "size": [
+   3.53,
+   0,
+   3.53
+  ],
+  "min": [
+   -0.88,
+   -0.01,
+   -4.18
+  ],
+  "file": "racing/roadCornerLargerSand.glb",
+  "label": "road corner larger sand"
+ },
+ "racing/roadCornerLargerSandInner": {
+  "size": [
+   2,
+   0,
+   2
+  ],
+  "min": [
+   0.65,
+   -0.01,
+   -2.65
+  ],
+  "file": "racing/roadCornerLargerSandInner.glb",
+  "label": "road corner larger sand inner"
+ },
+ "racing/roadCornerLargerWall": {
+  "size": [
+   3.58,
+   0.04,
+   3.58
+  ],
+  "min": [
+   -0.93,
+   -0.01,
+   -4.23
+  ],
+  "file": "racing/roadCornerLargerWall.glb",
+  "label": "road corner larger wall"
+ },
+ "racing/roadCornerLargerWallInner": {
+  "size": [
+   1.47,
+   0.04,
+   1.47
+  ],
+  "min": [
+   1.18,
+   -0.01,
+   -2.12
+  ],
+  "file": "racing/roadCornerLargerWallInner.glb",
+  "label": "road corner larger wall inner"
+ },
+ "racing/roadCornerLargeSand": {
+  "size": [
+   2.53,
+   0,
+   2.53
+  ],
+  "min": [
+   -0.88,
+   -0.01,
+   -3.18
+  ],
+  "file": "racing/roadCornerLargeSand.glb",
+  "label": "road corner large sand"
+ },
+ "racing/roadCornerLargeSandInner": {
+  "size": [
+   1,
+   0,
+   1
+  ],
+  "min": [
+   0.65,
+   -0.01,
+   -1.65
+  ],
+  "file": "racing/roadCornerLargeSandInner.glb",
+  "label": "road corner large sand inner"
+ },
+ "racing/roadCornerLargeWall": {
+  "size": [
+   2.58,
+   0.04,
+   2.58
+  ],
+  "min": [
+   -0.93,
+   -0.01,
+   -3.23
+  ],
+  "file": "racing/roadCornerLargeWall.glb",
+  "label": "road corner large wall"
+ },
+ "racing/roadCornerLargeWallInner": {
+  "size": [
+   0.47,
+   0.04,
+   0.47
+  ],
+  "min": [
+   1.18,
+   -0.01,
+   -1.12
+  ],
+  "file": "racing/roadCornerLargeWallInner.glb",
+  "label": "road corner large wall inner"
+ },
+ "racing/roadCornerSmall": {
+  "size": [
+   1,
+   0.02,
+   1
+  ],
+  "min": [
+   -0.35,
+   -0.01,
+   -1.65
+  ],
+  "file": "racing/roadCornerSmall.glb",
+  "label": "road corner small"
+ },
+ "racing/roadCornerSmallBorder": {
+  "size": [
+   1.21,
+   0.02,
+   1.21
+  ],
+  "min": [
+   -0.56,
+   -0.01,
+   -1.86
+  ],
+  "file": "racing/roadCornerSmallBorder.glb",
+  "label": "road corner small border"
+ },
+ "racing/roadCornerSmallSand": {
+  "size": [
+   1.53,
+   0,
+   1.53
+  ],
+  "min": [
+   -0.88,
+   -0.01,
+   -2.18
+  ],
+  "file": "racing/roadCornerSmallSand.glb",
+  "label": "road corner small sand"
+ },
+ "racing/roadCornerSmallSquare": {
+  "size": [
+   1,
+   0.02,
+   1
+  ],
+  "min": [
+   -0.35,
+   -0.01,
+   -1.65
+  ],
+  "file": "racing/roadCornerSmallSquare.glb",
+  "label": "road corner small square"
+ },
+ "racing/roadCornerSmallWall": {
+  "size": [
+   1.58,
+   0.04,
+   1.58
+  ],
+  "min": [
+   -0.93,
+   -0.01,
+   -2.23
+  ],
+  "file": "racing/roadCornerSmallWall.glb",
+  "label": "road corner small wall"
+ },
+ "racing/roadCrossing": {
+  "size": [
+   2,
+   0.02,
+   2
+  ],
+  "min": [
+   -0.35,
+   -0.01,
+   -1.15
+  ],
+  "file": "racing/roadCrossing.glb",
+  "label": "road crossing"
+ },
+ "racing/roadCurved": {
+  "size": [
+   1.5,
+   0.02,
+   2
+  ],
+  "min": [
+   -0.85,
+   -0.01,
+   -2.65
+  ],
+  "file": "racing/roadCurved.glb",
+  "label": "road curved"
+ },
+ "racing/roadCurvedSplit": {
+  "size": [
+   2,
+   0.02,
+   2
+  ],
+  "min": [
+   -0.85,
+   -0.01,
+   -2.65
+  ],
+  "file": "racing/roadCurvedSplit.glb",
+  "label": "road curved split"
+ },
+ "racing/roadEnd": {
+  "size": [
+   1,
+   0.02,
+   1.5
+  ],
+  "min": [
+   -0.35,
+   -0.01,
+   -2.15
+  ],
+  "file": "racing/roadEnd.glb",
+  "label": "road end"
+ },
+ "racing/roadPitEntry": {
+  "size": [
+   2,
+   0.02,
+   2
+  ],
+  "min": [
+   -0.35,
+   -0.01,
+   -2.65
+  ],
+  "file": "racing/roadPitEntry.glb",
+  "label": "road pit entry"
+ },
+ "racing/roadPitGarage": {
+  "size": [
+   1,
+   0.02,
+   1
+  ],
+  "min": [
+   -0.35,
+   -0.01,
+   -1.65
+  ],
+  "file": "racing/roadPitGarage.glb",
+  "label": "road pit garage"
+ },
+ "racing/roadPitStraight": {
+  "size": [
+   1,
+   0.02,
+   1
+  ],
+  "min": [
+   -0.35,
+   -0.01,
+   -1.65
+  ],
+  "file": "racing/roadPitStraight.glb",
+  "label": "road pit straight"
+ },
+ "racing/roadPitStraightLong": {
+  "size": [
+   1,
+   0.02,
+   2
+  ],
+  "min": [
+   -0.35,
+   -0.01,
+   -2.65
+  ],
+  "file": "racing/roadPitStraightLong.glb",
+  "label": "road pit straight long"
+ },
+ "racing/roadRamp": {
+  "size": [
+   1,
+   0.27,
+   1
+  ],
+  "min": [
+   -0.35,
+   -0.01,
+   -1.65
+  ],
+  "file": "racing/roadRamp.glb",
+  "label": "road ramp"
+ },
+ "racing/roadRampLong": {
+  "size": [
+   1,
+   0.52,
+   2
+  ],
+  "min": [
+   -0.35,
+   -0.01,
+   -2.65
+  ],
+  "file": "racing/roadRampLong.glb",
+  "label": "road ramp long"
+ },
+ "racing/roadRampLongCurved": {
+  "size": [
+   1,
+   0.52,
+   2
+  ],
+  "min": [
+   -0.35,
+   -0.01,
+   -2.65
+  ],
+  "file": "racing/roadRampLongCurved.glb",
+  "label": "road ramp long curved"
+ },
+ "racing/roadRampLongCurvedWall": {
+  "size": [
+   1,
+   0.52,
+   2
+  ],
+  "min": [
+   -0.35,
+   -0.01,
+   -2.65
+  ],
+  "file": "racing/roadRampLongCurvedWall.glb",
+  "label": "road ramp long curved wall"
+ },
+ "racing/roadRampLongWall": {
+  "size": [
+   1,
+   0.52,
+   2
+  ],
+  "min": [
+   -0.35,
+   -0.01,
+   -2.65
+  ],
+  "file": "racing/roadRampLongWall.glb",
+  "label": "road ramp long wall"
+ },
+ "racing/roadRampWall": {
+  "size": [
+   1,
+   0.27,
+   1
+  ],
+  "min": [
+   -0.35,
+   -0.01,
+   -1.65
+  ],
+  "file": "racing/roadRampWall.glb",
+  "label": "road ramp wall"
+ },
+ "racing/roadSide": {
+  "size": [
+   2,
+   0.02,
+   2
+  ],
+  "min": [
+   -0.35,
+   -0.01,
+   -2.65
+  ],
+  "file": "racing/roadSide.glb",
+  "label": "road side"
+ },
+ "racing/roadSplit": {
+  "size": [
+   3,
+   0.02,
+   2
+  ],
+  "min": [
+   -1.35,
+   -0.01,
+   -2.65
+  ],
+  "file": "racing/roadSplit.glb",
+  "label": "road split"
+ },
+ "racing/roadSplitLarge": {
+  "size": [
+   2,
+   0.02,
+   2
+  ],
+  "min": [
+   -0.35,
+   -0.01,
+   -2.65
+  ],
+  "file": "racing/roadSplitLarge.glb",
+  "label": "road split large"
+ },
+ "racing/roadSplitLarger": {
+  "size": [
+   3,
+   0.02,
+   3
+  ],
+  "min": [
+   -0.35,
+   -0.01,
+   -3.65
+  ],
+  "file": "racing/roadSplitLarger.glb",
+  "label": "road split larger"
+ },
+ "racing/roadSplitRound": {
+  "size": [
+   3,
+   0.02,
+   2
+  ],
+  "min": [
+   -1.35,
+   -0.01,
+   -2.65
+  ],
+  "file": "racing/roadSplitRound.glb",
+  "label": "road split round"
+ },
+ "racing/roadSplitRoundLarge": {
+  "size": [
+   5,
+   0.02,
+   3
+  ],
+  "min": [
+   -2.35,
+   -0.01,
+   -3.65
+  ],
+  "file": "racing/roadSplitRoundLarge.glb",
+  "label": "road split round large"
+ },
+ "racing/roadSplitSmall": {
+  "size": [
+   1,
+   0.02,
+   1
+  ],
+  "min": [
+   -0.35,
+   -0.01,
+   -1.65
+  ],
+  "file": "racing/roadSplitSmall.glb",
+  "label": "road split small"
+ },
+ "racing/roadStart": {
+  "size": [
+   1.26,
+   0.668,
+   2
+  ],
+  "min": [
+   -0.35,
+   -0.01,
+   -2.65
+  ],
+  "file": "racing/roadStart.glb",
+  "label": "road start"
+ },
+ "racing/roadStartPositions": {
+  "size": [
+   1,
+   0.02,
+   2
+  ],
+  "min": [
+   -0.35,
+   -0.01,
+   -2.65
+  ],
+  "file": "racing/roadStartPositions.glb",
+  "label": "road start positions"
+ },
+ "racing/roadStraight": {
+  "size": [
+   1,
+   0.02,
+   1
+  ],
+  "min": [
+   -0.35,
+   -0.01,
+   -1.65
+  ],
+  "file": "racing/roadStraight.glb",
+  "label": "road straight"
+ },
+ "racing/roadStraightArrow": {
+  "size": [
+   1,
+   0.02,
+   1
+  ],
+  "min": [
+   -0.35,
+   -0.01,
+   -1.65
+  ],
+  "file": "racing/roadStraightArrow.glb",
+  "label": "road straight arrow"
+ },
+ "racing/roadStraightBridge": {
+  "size": [
+   1,
+   0.52,
+   1
+  ],
+  "min": [
+   -0.35,
+   -0.01,
+   -1.65
+  ],
+  "file": "racing/roadStraightBridge.glb",
+  "label": "road straight bridge"
+ },
+ "racing/roadStraightBridgeMid": {
+  "size": [
+   1,
+   0.127,
+   1
+  ],
+  "min": [
+   -0.35,
+   0.383,
+   -1.65
+  ],
+  "file": "racing/roadStraightBridgeMid.glb",
+  "label": "road straight bridge mid"
+ },
+ "racing/roadStraightBridgeStart": {
+  "size": [
+   1,
+   0.52,
+   1
+  ],
+  "min": [
+   -0.35,
+   -0.01,
+   -1.65
+  ],
+  "file": "racing/roadStraightBridgeStart.glb",
+  "label": "road straight bridge start"
+ },
+ "racing/roadStraightLong": {
+  "size": [
+   1,
+   0.02,
+   2
+  ],
+  "min": [
+   -0.35,
+   -0.01,
+   -2.65
+  ],
+  "file": "racing/roadStraightLong.glb",
+  "label": "road straight long"
+ },
+ "racing/roadStraightLongBump": {
+  "size": [
+   1,
+   0.26,
+   2
+  ],
+  "min": [
+   -0.35,
+   -0.01,
+   -2.65
+  ],
+  "file": "racing/roadStraightLongBump.glb",
+  "label": "road straight long bump"
+ },
+ "racing/roadStraightLongBumpRound": {
+  "size": [
+   1,
+   0.04,
+   2
+  ],
+  "min": [
+   -0.35,
+   -0.01,
+   -2.65
+  ],
+  "file": "racing/roadStraightLongBumpRound.glb",
+  "label": "road straight long bump round"
+ },
+ "racing/roadStraightLongMid": {
+  "size": [
+   1,
+   0.02,
+   2
+  ],
+  "min": [
+   -0.35,
+   -0.01,
+   -2.65
+  ],
+  "file": "racing/roadStraightLongMid.glb",
+  "label": "road straight long mid"
+ },
+ "racing/roadStraightSkew": {
+  "size": [
+   2,
+   0.02,
+   2
+  ],
+  "min": [
+   -0.35,
+   -0.01,
+   -2.65
+  ],
+  "file": "racing/roadStraightSkew.glb",
+  "label": "road straight skew"
+ },
+ "racing/tent": {
+  "size": [
+   1,
+   0.7,
+   1
+  ],
+  "min": [
+   -0.35,
+   -0.01,
+   -1.65
+  ],
+  "file": "racing/tent.glb",
+  "label": "tent"
+ },
+ "racing/tentClosed": {
+  "size": [
+   1,
+   0.7,
+   1
+  ],
+  "min": [
+   -0.35,
+   -0.01,
+   -1.65
+  ],
+  "file": "racing/tentClosed.glb",
+  "label": "tent closed"
+ },
+ "racing/tentClosedLong": {
+  "size": [
+   2,
+   0.7,
+   1
+  ],
+  "min": [
+   -0.35,
+   -0.01,
+   -1.65
+  ],
+  "file": "racing/tentClosedLong.glb",
+  "label": "tent closed long"
+ },
+ "racing/tentLong": {
+  "size": [
+   2,
+   0.7,
+   1
+  ],
+  "min": [
+   -0.35,
+   -0.01,
+   -1.65
+  ],
+  "file": "racing/tentLong.glb",
+  "label": "tent long"
+ },
+ "racing/tentRoof": {
+  "size": [
+   0.56,
+   0.63,
+   0.99
+  ],
+  "min": [
+   -0.35,
+   -0.01,
+   -1.64
+  ],
+  "file": "racing/tentRoof.glb",
+  "label": "tent roof"
+ },
+ "racing/tentRoofDouble": {
+  "size": [
+   1.12,
+   0.63,
+   0.99
+  ],
+  "min": [
+   -0.35,
+   -0.01,
+   -1.64
+  ],
+  "file": "racing/tentRoofDouble.glb",
+  "label": "tent roof double"
+ },
+ "racing/treeLarge": {
+  "size": [
+   0.357,
+   1.507,
+   0.412
+  ],
+  "min": [
+   -0.528,
+   -0.01,
+   -0.856
+  ],
+  "file": "racing/treeLarge.glb",
+  "label": "tree large"
+ },
+ "racing/treeSmall": {
+  "size": [
+   0.253,
+   1.07,
+   0.292
+  ],
+  "min": [
+   -0.477,
+   -0.01,
+   -0.796
+  ],
+  "file": "racing/treeSmall.glb",
+  "label": "tree small"
+ },
+ "realistic/concrete_road_barrier": {
+  "size": [
+   1.545,
+   0.831,
+   0.639
+  ],
+  "min": [
+   -0.775,
+   -0.008,
+   -0.295
+  ],
+  "file": "realistic/concrete_road_barrier.gltf",
+  "label": "concrete road barrier"
+ }
+}

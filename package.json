@@ -1,0 +1,25 @@
+{
+  "name": "home-heist",
+  "version": "0.1.0",
+  "private": true,
+  "description": "A heist game in a world built from a real place. An AI world model decides what happens, and AI guards learn your tricks.",
+  "type": "module",
+  "engines": {
+    "node": ">=24"
+  },
+  "scripts": {
+    "start": "node src/server.ts",
+    "demo": "node src/demo.ts",
+    "test": "node --test test/*.test.ts",
+    "typecheck": "tsc --noEmit",
+    "api:check": "node src/tools/check-api.ts",
+    "api:try": "node src/tools/try-meta.ts",
+    "design": "node src/tools/design.ts",
+    "make": "node src/tools/make.ts",
+    "models": "node src/tools/models.ts"
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.5",
+    "typescript": "^7.0.2"
+  }
+}

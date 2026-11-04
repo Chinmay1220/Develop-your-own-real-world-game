@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Play</title>
+  <style>
+    html, body { margin: 0; height: 100%; overflow: hidden; background: #05070b; color: #e7ecf5; font-family: system-ui, sans-serif; }
+    #game { position: fixed; inset: 0; }
+    #errors { position: fixed; left: 12px; bottom: 12px; max-width: 60%; max-height: 40%; overflow: auto; margin: 0; padding: 8px 10px; border-radius: 8px; background: rgba(120, 20, 20, 0.85); font-size: 12px; white-space: pre-wrap; }
+    #errors:empty { display: none; }
+  </style>
+</head>
+<body>
+  <div id="game"></div>
+  <pre id="errors"></pre>
+  <script type="module">
+    // Plays one game the AI wrote: play.html?game=<id>. The test browser reads the "GAME ..." lines.
+    import { runGame } from "./sandbox.js";
+    const id = new URLSearchParams(location.search).get("game");
+    const [game, catalog] = await Promise.all([fetch(`/api/games/${encodeURIComponent(id)}`).then((r) => r.json()), fetch("/api/catalog").then((r) => r.json())]);
+    document.title = game.title ?? "Play";
+    runGame(document.getElementById("game"), game, catalog, (message) => {
+      console.log(`GAME ${message.kind}${message.message ? `: ${message.message}` : ""}`);
+      if (message.kind === "error") document.getElementById("errors").textContent += `${message.message}\n`;
+    });
+  </script>
+</body>
+</html>

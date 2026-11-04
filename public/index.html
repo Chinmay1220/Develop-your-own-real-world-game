@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Home Heist</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="top">
+    <div class="brand">
+      <h1>Home Heist</h1>
+      <p class="tagline">Every trick works once.</p>
+    </div>
+    <div class="chips" id="chips"></div>
+  </header>
+
+  <main class="layout">
+    <section class="panel map-panel" aria-labelledby="room-name">
+      <h2 id="room-name">Loading…</h2>
+      <div class="legend">
+        <span style="--swatch: var(--thief)">You</span>
+        <span style="--swatch: var(--guard)">Guards</span>
+        <span style="--swatch: rgba(239, 93, 93, 0.45)">Seen by a guard</span>
+        <span style="--swatch: var(--exit)">Exit</span>
+      </div>
+      <svg id="map" viewBox="0 0 100 112" role="img" aria-label="Map of the room. Click a highlighted zone to move there."></svg>
+      <p class="room-desc" id="room-desc"></p>
+    </section>
+
+    <section class="panel play-panel" aria-label="Story and actions">
+      <div id="report" class="report" hidden></div>
+      <div>
+        <h2>Story</h2>
+        <ol id="log" class="log" aria-live="polite"></ol>
+      </div>
+      <div id="actions"></div>
+      <form id="free-form" class="free">
+        <label for="free-text">Or type any action</label>
+        <div class="free-row">
+          <input id="free-text" maxlength="200" autocomplete="off" placeholder="e.g. throw the shoe at the bathroom door">
+          <button id="free-submit" type="submit" class="primary">Try it</button>
+        </div>
+      </form>
+      <p class="thinking" id="thinking" hidden>The world model is deciding what happens…</p>
+      <p class="error" id="error" role="alert"></p>
+    </section>
+  </main>
+
+  <div class="wrap">
+    <section class="panel notebook" aria-label="What the AI has learned">
+      <div>
+        <h2>Guards' notebook</h2>
+        <p class="hint">Strategy the guards wrote after rounds they lost.</p>
+        <ul class="lessons" id="guard-lessons"></ul>
+      </div>
+      <div>
+        <h2>World lessons</h2>
+        <p class="hint">Corrections from the teacher, who checks the world model against the real room.</p>
+        <ul class="lessons" id="world-lessons"></ul>
+      </div>
+      <div>
+        <h2>Rounds</h2>
+        <table>
+          <thead><tr><th>Round</th><th>Result</th><th>Steps</th><th>Mistakes caught</th></tr></thead>
+          <tbody id="history"></tbody>
+        </table>
+        <div class="notebook-buttons">
+          <button id="restart" type="button">Restart round</button>
+          <button id="wipe" type="button" class="ghost">Wipe memory</button>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <footer id="mode-note"></footer>
+  <script type="module" src="app.js"></script>
+</body>
+</html>

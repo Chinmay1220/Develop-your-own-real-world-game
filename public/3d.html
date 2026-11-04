@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Home Heist 3D</title>
+  <style>
+    html, body { margin: 0; height: 100%; overflow: hidden; background: #0b0f17; color: #e7ecf5; font-family: system-ui, -apple-system, "Segoe UI", sans-serif; }
+    #scene { position: fixed; inset: 0; width: 100vw; height: 100vh; display: block; cursor: grab; }
+    #scene:active { cursor: grabbing; }
+    .panel { position: fixed; padding: 8px 12px; border: 1px solid #2a3550; border-radius: 10px; background: rgba(21, 28, 42, 0.85); }
+    .title { left: 16px; top: 14px; pointer-events: none; background: none; border: none; padding: 0; }
+    .title h1 { margin: 0; font-size: 22px; letter-spacing: 0.02em; text-shadow: 0 2px 8px #000; }
+    .title p { margin: 2px 0 0; color: #f5b942; font-weight: 600; text-shadow: 0 2px 8px #000; }
+    .note { right: 16px; top: 14px; max-width: 300px; color: #95a1b6; font-size: 13px; }
+    .controls { left: 50%; bottom: 14px; transform: translateX(-50%); max-width: calc(100% - 32px); font-size: 13px; text-align: center; }
+    .controls b { color: #f5b942; }
+    #status { left: 16px; bottom: 74px; max-width: calc(100% - 32px); font-size: 14px; }
+    #status .say { display: block; color: #f5b942; }
+    #banner { position: fixed; inset: 0; display: grid; place-items: center; pointer-events: none; text-align: center; font-size: 52px; font-weight: 800; text-shadow: 0 4px 24px #000; }
+    #banner small { display: block; margin-top: 6px; font-size: 17px; font-weight: 500; color: #c9d2e3; }
+    #banner .loading { font-size: 20px; font-weight: 600; color: #95a1b6; }
+    .bubble { position: fixed; transform: translate(-50%, -100%); padding: 4px 10px; border-radius: 10px; background: rgba(240, 244, 250, 0.95); color: #10141c; font-size: 13px; font-weight: 600; white-space: nowrap; pointer-events: none; }
+    .bubble::after { content: ""; position: absolute; left: 50%; bottom: -6px; margin-left: -6px; border: 6px solid transparent; border-bottom: 0; border-top-color: rgba(240, 244, 250, 0.95); }
+  </style>
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js",
+        "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/"
+      }
+    }
+  </script>
+</head>
+<body>
+  <canvas id="scene"></canvas>
+  <div class="panel title"><h1>Home Heist 3D</h1><p>Every trick works once.</p></div>
+  <div class="panel note">3D prototype. The guards follow simple rules here; Meta's models will drive them next. Characters: Soldier and X Bot from the three.js examples.</div>
+  <div class="panel" id="status"></div>
+  <div id="bubbles"></div>
+  <div id="banner"><div class="loading">Loading the characters…</div></div>
+  <div class="panel controls">
+    <b>WASD</b> move · <b>Shift</b> run (noisy) · <b>C</b> sneak · <b>drag</b> look around · <b>T</b> throw the shoe ·
+    <b>L</b> lamp · <b>F</b> hide in the closet · <b>E</b> take the laptop · <b>V</b> switch camera · <b>R</b> restart
+  </div>
+  <script type="module" src="3d.js"></script>
+</body>
+</html>

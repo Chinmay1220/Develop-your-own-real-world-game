@@ -1,0 +1,8 @@
+These assets come from Poly Haven (https://polyhaven.com) and are CC0 (public domain):
+free for any use, with no credit required.
+
+sky/kloofendal_2k.hdr        kloofendal_48d_partly_cloudy_puresky (HDRI)
+asphalt/                     asphalt_02 (texture)
+grass/                       aerial_grass_rock (texture)
+gravel/                      gravel (texture)
+(the concrete_road_barrier model is in public/models/realistic/)

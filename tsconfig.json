@@ -1,0 +1,19 @@
+{
+  // Type-checking only. Node 24 runs the .ts files directly by stripping the types,
+  // so the code sticks to syntax that can be erased (no enums, no namespaces).
+  "compilerOptions": {
+    "target": "es2023",
+    "lib": ["es2023"],
+    "module": "nodenext",
+    "moduleResolution": "nodenext",
+    "types": ["node"],
+    "noEmit": true,
+    "allowImportingTsExtensions": true,
+    "verbatimModuleSyntax": true,
+    "erasableSyntaxOnly": true,
+    "strict": true,
+    "noUncheckedIndexedAccess": false,
+    "skipLibCheck": true
+  },
+  "include": ["src", "test"]
+}

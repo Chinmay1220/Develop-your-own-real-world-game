@@ -1,0 +1,42 @@
+{
+  "id": "sample-bedroom",
+  "name": "Sample bedroom office",
+  "description": "A small bedroom that doubles as an office, at night. A desk with a laptop sits in the top-right corner, hidden from the window by a tall bookshelf. A bed with the only lamp is on the left, a closet on the right, and doors lead to the hallway and the bathroom. You climbed in through the window.",
+  "maxSteps": 30,
+  "targetId": "laptop",
+  "facts": [
+    {
+      "text": "The bed has storage drawers underneath, so there is no space to hide under it.",
+      "object": "bed",
+      "forbids": "hide"
+    },
+    { "text": "A tall bookshelf stands between the window and the desk, so neither can be seen from the other." },
+    { "text": "The closet is deep enough for one person to stand inside." },
+    { "text": "The bedside lamp is the only light in the room at night." }
+  ],
+  "zones": [
+    { "id": "window", "name": "the window", "x": 16, "y": 16, "exit": true, "neighbors": ["rug", "bed", "desk"], "sees": ["rug", "bed"] },
+    { "id": "desk", "name": "the desk", "x": 80, "y": 16, "neighbors": ["rug", "closet", "window"], "sees": ["rug", "closet"] },
+    { "id": "rug", "name": "the rug", "x": 48, "y": 46, "neighbors": ["window", "desk", "bed", "closet", "door"], "sees": ["window", "desk", "bed", "closet", "door"] },
+    { "id": "bed", "name": "the bed", "x": 16, "y": 58, "neighbors": ["rug", "window", "door"], "sees": ["window", "rug", "door"] },
+    { "id": "closet", "name": "the closet", "x": 84, "y": 54, "neighbors": ["desk", "rug", "bathroom"], "sees": ["desk", "rug", "bathroom"] },
+    { "id": "door", "name": "the door", "x": 40, "y": 86, "exit": true, "neighbors": ["rug", "bed", "bathroom"], "sees": ["rug", "bed", "bathroom"] },
+    { "id": "bathroom", "name": "the bathroom door", "x": 84, "y": 86, "neighbors": ["closet", "door"], "sees": ["closet", "door"] }
+  ],
+  "objects": [
+    { "id": "laptop", "name": "laptop", "aliases": ["computer", "notebook"], "zone": "desk", "heldBy": null, "portable": true, "loudness": 2, "notes": "A silver laptop on the desk. This is what you came for." },
+    { "id": "mug", "name": "coffee mug", "aliases": ["mug", "cup"], "zone": "desk", "heldBy": null, "portable": true, "breakable": true, "broken": false, "loudness": 3, "notes": "A ceramic mug. It would shatter loudly." },
+    { "id": "shoe", "name": "shoe", "aliases": ["sneaker"], "zone": null, "heldBy": "thief", "portable": true, "loudness": 2, "notes": "Your spare shoe." },
+    { "id": "pillow", "name": "pillow", "zone": "bed", "heldBy": null, "portable": true, "loudness": 1, "notes": "A soft pillow. It barely makes a sound when it lands." },
+    { "id": "lamp", "name": "bedside lamp", "aliases": ["lamp", "light"], "zone": "bed", "heldBy": null, "switchable": true, "lightSource": true, "on": true, "notes": "The only light in the room. Without it the room is dark." },
+    { "id": "bed", "name": "bed", "zone": "bed", "heldBy": null, "hideCapacity": 1, "hidePhrase": "under the bed", "notes": "A double bed. It looks like there may be space underneath." },
+    { "id": "closet", "name": "closet", "aliases": ["wardrobe"], "zone": "closet", "heldBy": null, "hideCapacity": 1, "hidePhrase": "inside the closet", "notes": "A tall closet with a door." },
+    { "id": "curtains", "name": "curtains", "aliases": ["curtain"], "zone": "window", "heldBy": null, "hideCapacity": 1, "hidePhrase": "behind the curtains", "notes": "Long curtains that reach the floor." },
+    { "id": "bookshelf", "name": "bookshelf", "aliases": ["shelf", "shelves"], "zone": "window", "heldBy": null, "notes": "A tall bookshelf that blocks the view between the window and the desk." }
+  ],
+  "agents": [
+    { "id": "thief", "name": "You", "role": "thief", "zone": "window", "hiddenIn": null },
+    { "id": "guardA", "name": "Guard A", "role": "guard", "zone": "desk", "hiddenIn": null, "post": "desk", "duty": "target" },
+    { "id": "guardB", "name": "Guard B", "role": "guard", "zone": "door", "hiddenIn": null, "post": "door", "duty": "exit" }
+  ]
+}

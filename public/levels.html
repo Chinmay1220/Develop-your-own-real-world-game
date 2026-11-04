@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Home Heist: Game Maker</title>
+  <style>
+    html, body { margin: 0; height: 100%; overflow: hidden; background: #0b0f17; color: #e7ecf5; font-family: system-ui, -apple-system, "Segoe UI", sans-serif; }
+    #scene { position: fixed; inset: 0; width: 100vw; height: 100vh; display: block; cursor: grab; }
+    #scene:active { cursor: grabbing; }
+    .panel { position: fixed; padding: 12px 14px; border: 1px solid #2a3550; border-radius: 12px; background: rgba(21, 28, 42, 0.9); }
+    #maker { left: 16px; top: 16px; width: 360px; max-height: calc(100vh - 92px); overflow: auto; box-sizing: border-box; }
+    h1 { margin: 0 0 2px; font-size: 20px; }
+    .tagline { margin: 0 0 10px; color: #f5b942; font-weight: 600; font-size: 14px; }
+    textarea { width: 100%; box-sizing: border-box; min-height: 64px; resize: vertical; padding: 8px 10px; border: 1px solid #34415f; border-radius: 8px; background: #0e1420; color: #e7ecf5; font: inherit; font-size: 14px; }
+    button, select { font: inherit; font-size: 14px; border-radius: 8px; }
+    button { margin-top: 8px; padding: 7px 14px; border: none; background: #f5b942; color: #10141c; font-weight: 700; cursor: pointer; }
+    button:disabled { opacity: 0.55; cursor: wait; }
+    .actions { display: flex; gap: 8px; }
+    .speak { display: inline-flex; align-items: center; gap: 6px; background: #2a3550; color: #e7ecf5; --level: 0; }
+    .speak.listening { background: #ef5d5d; color: #10141c; box-shadow: 0 0 0 calc(2px + var(--level) * 10px) rgba(239, 93, 79, 0.35); }
+    select { width: 100%; padding: 6px 8px; border: 1px solid #34415f; background: #0e1420; color: #e7ecf5; }
+    #status { margin: 8px 0 0; color: #95a1b6; font-size: 13px; min-height: 1em; }
+    #status.error { color: #ef8a7a; }
+    hr { border: none; border-top: 1px solid #2a3550; margin: 12px 0; }
+    #level h2 { margin: 8px 0 4px; font-size: 18px; }
+    #level p { margin: 4px 0; font-size: 14px; line-height: 1.4; }
+    #level .prompt { color: #95a1b6; font-style: italic; }
+    #level .note { color: #f5b942; }
+    #level ul { margin: 6px 0 0; padding-left: 18px; font-size: 13px; color: #c9d2e3; }
+    .legend { left: 50%; bottom: 14px; transform: translateX(-50%); max-width: calc(100% - 32px); font-size: 13px; text-align: center; }
+    .legend b { color: #f5b942; }
+    .legend .exit { color: #48c487; font-weight: 700; }
+    .legend .view { color: #ff8a7a; font-weight: 700; }
+    @media (max-width: 720px) { #maker { width: calc(100% - 32px); max-height: 45vh; } }
+  </style>
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js",
+        "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/"
+      }
+    }
+  </script>
+</head>
+<body>
+  <canvas id="scene"></canvas>
+  <div class="panel" id="maker">
+    <h1>Home Heist: Game Maker</h1>
+    <p class="tagline">Say or type a game. Meta's Muse Spark designs it.</p>
+    <textarea id="prompt" placeholder="Type or speak. For example: a prison escape where I steal the warden's keycard. Two guards and a robot."></textarea>
+    <div class="actions">
+      <button id="speak" class="speak" title="Say your idea instead of typing it. It stops listening when you pause.">
+        <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path fill="currentColor" d="M12 15a3 3 0 0 0 3-3V6a3 3 0 0 0-6 0v6a3 3 0 0 0 3 3Zm5-3a5 5 0 0 1-10 0H5a7 7 0 0 0 6 6.93V21h2v-2.07A7 7 0 0 0 19 12h-2Z"/></svg>
+        <span>Speak</span>
+      </button>
+      <button id="design">Design my game</button>
+    </div>
+    <p id="status"></p>
+    <hr>
+    <select id="levels" aria-label="Designed levels"></select>
+    <div id="level"></div>
+  </div>
+  <div class="panel legend">
+    <b>★ ring</b> the target · <span class="exit">EXIT</span> the way out · <span class="view">red cones</span> what hunters see ·
+    <b>drag</b> to turn · <b>scroll</b> to zoom
+  </div>
+  <script type="module" src="levels.js"></script>
+</body>
+</html>
