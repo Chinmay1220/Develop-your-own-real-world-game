@@ -1426,6 +1426,44 @@ Fixed along the way:
 |---|---|
 | ![Before](images/tint-before.png) | ![After](images/tint-after.png) |
 
+## Step 35: Real road cars, and no stand-in bodies
+
+**The test:** the NYC prompt was made a third time with the rules from step 34. It took 2 versions, 2.5 minutes and $0.55.
+
+**Result:**
+- **What worked:**
+  - The player is a real person: `Male_Adult_12`, the young man in the denim jacket.
+  - The streets have lamps 4.6 m up, and both officers carry torches: `kit.lamp(cop.root, …)`.
+  - The game added no ambient lights of its own.
+  - Brick, plaster, paved pavements and cracked asphalt make it look like a real night alley.
+- **Two problems:**
+  - **The real person was hidden inside a red capsule.** After the reviewer complained about a blank start, Muse Wonder built "fallback figures" in every person's root to show while they load, and never removed them.
+  - **Cars were the catalog's box car** (`kit.thing("car")`), the weakest-looking thing in the game.
+
+**Fixes:**
+- **`kit.vehicle("sedan" | "taxi" | "police" | "suv")`** builds real road cars in code, to real size (a sedan is 4.75 × 1.84 m):
+  - the side profile is cut with real wheel arches, then rounded off, with smooth shading over the rounded edges;
+  - glass all round the cabin, a body-coloured roof and pillars, clear-coat paint, five-spoke rims, glowing head and tail lights;
+  - a taxi has its roof sign; a police car has a blue stripe, POLICE on its doors and a light bar;
+  - `lights: true` turns on headlights that light the road ahead;
+  - the police light bar flashes red and blue and lights the street through two `kit.lamp`s; `car.sirenOn = false` stops it;
+  - parked cars are solid.
+- **The writer:**
+  - uses these cars for every car, taxi and police car;
+  - is no longer offered the box car;
+  - must not repaint a car's parts.
+- **Real people:**
+  - The writer is told they appear about a second after the start, and must never get stand-in bodies.
+  - `c.ready` is a promise for games that need to wait.
+
+| The NYC game: real walls, lamps, a torch (and the capsule) | Road cars by day |
+|---|---|
+| ![NYC](images/nyc-night-chase.png) | ![Cars by day](images/cars-day.png) |
+
+| Road cars at night: headlights, street lamps and the police light bar |
+|---|
+| ![Cars at night](images/cars-night.png) |
+
 ## Final check
 
 Run these from the project folder to repeat the checks:

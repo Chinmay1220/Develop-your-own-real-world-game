@@ -15,6 +15,7 @@ import { RoomEnvironment } from "three/addons/environments/RoomEnvironment.js";
 import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
 import { RGBELoader } from "three/addons/loaders/RGBELoader.js";
 import { buildF1Car } from "./f1car.js";
+import { buildRoadCar, ROAD_CARS } from "./roadcar.js";
 import { createLive } from "./live.js";
 import { breakUpRepetition } from "./notile.js";
 import { loadCharacters, makeCharacter, play } from "../characters.js";
@@ -953,12 +954,27 @@ export async function startKit({ catalog, models = {} }) {
      * accent, number, tyre ("soft", "medium" or "hard") and helmet. Returns car with car.root (move and
      * turn it; it faces +z), car.steer(angle) for the front wheels and car.roll(metres) to spin the wheels.
      */
-    vehicle(type, { at = [0, 0, 0], turn = 0, ...options } = {}) {
-      if (type !== "f1") console.warn(`kit.vehicle: unknown type "${type}", using "f1"`);
-      const car = buildF1Car(options);
-      car.root.position.set(...at);
+    vehicle(type, { at = [0, 0, 0], turn = 0, solid, lights = false, siren = true, ...options } = {}) {
+      const road = ROAD_CARS.includes(type);
+      if (!road && type !== "f1") console.warn(`kit.vehicle: unknown type "${type}", using "sedan"`);
+      const car = road || type !== "f1" ? buildRoadCar(road ? type : "sedan", options) : buildF1Car(options);
+      car.root.position.set(...(Array.isArray(at) ? at : [at.x ?? 0, at.y ?? 0, at.z ?? 0]));
       car.root.rotation.y = turn;
       scene.add(car.root);
+      if (car.flash) {
+        // Headlights that light the road ahead, and a police car's flashing red and blue.
+        const half = car.length / 2;
+        car.headlights = lights ? [kit.lamp(car.root, { offset: [0, 0.8, half + 1.2], color: "#fff4e2", power: 0.8, reach: 22 })] : [];
+        if (car.kind === "police") {
+          car.sirenOn = siren; // set car.sirenOn = false to stop the flashing lights
+          const flashes = [kit.lamp(car.root, { offset: [-0.4, 1.9, 0], color: "#ff2a2a", power: 0.7, reach: 14 }), kit.lamp(car.root, { offset: [0.4, 1.9, 0], color: "#2a5cff", power: 0.7, reach: 14 })];
+          kit.onUpdate((dt, time) => {
+            const lit = car.flash(time, car.sirenOn);
+            flashes.forEach((lamp, i) => (lamp.on = lit === i));
+          });
+        }
+        if (solid ?? true) kit.solid(car.root); // parked cars are solid; pass solid: false for cars that drive
+      } else if (solid) kit.solid(car.root);
       return car;
     },
 
@@ -993,6 +1009,7 @@ export async function startKit({ catalog, models = {} }) {
       person.height *= scale;
       person.play = (name, timeScale) => play(person, name, timeScale);
       person.face = (x, z) => (person.root.rotation.y = Math.atan2(x - person.root.position.x, z - person.root.position.z));
+      person.ready ??= Promise.resolve(); // real people: when their body has appeared
       scene.add(person.root);
       people.push(person);
       return person;

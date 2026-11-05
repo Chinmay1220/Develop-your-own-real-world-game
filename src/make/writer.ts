@@ -27,6 +27,7 @@ export interface GameWriter {
 }
 
 const things = Object.entries(CATALOG)
+  .filter(([kind]) => kind !== "car") // kit.vehicle has real road cars
   .map(([kind, item]) => `${kind} (${item.size.join("×")} m)`)
   .join(", ");
 const looks = Object.entries(LOOKS)
@@ -91,7 +92,7 @@ You may import three.js (version 0.170): import * as THREE from "three"; and its
 
 The game must:
 - look as real as the kit allows. The most realistic parts come first:
-  - kit.vehicle("f1") for race cars;
+  - kit.vehicle("f1") for race cars, and kit.vehicle("sedan" | "taxi" | "police" | "suv") for every other car;
   - kit.road for tracks and roads;
   - a real photographed sky: await kit.sky("polyhaven/<sky>") (or kit.sky("real")), with a real scanned ground ("polyhaven/<surface>", "grass", "asphalt" or "gravel");
   - real scanned objects from Poly Haven (kit.model("polyhaven/<id>")) for furniture, props, tools, barrels, crates, lamps, food, plants, rocks, ships, cannons and everything else they cover;
@@ -129,6 +130,10 @@ ${scannedSurfaces || "  (none listed)"}
 - kit.vehicle("f1", { at, turn, color, accent, number, tyre, helmet }) is a detailed Formula 1 car built to real size (5.6 m long, 2 m wide): sculpted body, wings, halo, a driver, and tyres with coloured bands ("soft", "medium" or "hard"). It faces +z.
   - It returns car with car.root (move and turn it), car.steer(angle) to turn the front wheels, and car.roll(metres) to spin all four wheels by the distance driven.
   - Use it for every F1 or open-wheel race car instead of a model or shapes.
+- kit.vehicle("sedan" | "taxi" | "police" | "suv", { at, turn, color, lights, siren, solid }) is a real road car to real size (a sedan is 4.75 m long and 1.84 m wide, an SUV 4.8 m): rounded body with wheel arches, glass all round, clear-coat paint, glowing head and tail lights. A taxi has its roof sign; a police car has a light bar that flashes red and blue and lights the street (set car.sirenOn = false to stop it). It faces +z.
+  - color is the paint (taxi and police have their own); don't repaint its parts. lights: true switches on headlights that light the road ahead, for cars that drive at night.
+  - Parked cars are solid; pass solid: false for a car that drives, and move car.root yourself (car.steer and car.roll work as for the F1 car). car.length and car.width are its size.
+  - Use it for every car, taxi and police car: parked along streets, in traffic, or for the player to drive.
 - kit.effects.speed (0 to 1) adds motion blur, so set it from the speed in fast games. kit.effects.vignette (0 to 1, 0.3 by default) darkens the corners.
 - kit.shape(kind, { size: [w, h, d], color: "#rrggbb", at: [x, y, z], rotate: [x, y, z], material, glow, solid, opacity, surface }): a "box", "rounded" (soft edges), "sphere", "capsule", "cylinder", "cone" or "torus". at is its centre. material is "plastic" (the default), "paint" (glossy, like a car), "metal", "chrome", "glass", "rubber", "matte" or "glow". surface: "polyhaven/<surface>" covers it with a real scanned surface instead, at its real size on every face (bricks stay brick-sized on a long wall and a thin pillar), and color then tints it. Returns a THREE.Mesh. The scene has real sky lighting and reflections, so pick materials that show them off.
 - kit.wall([x1, z1], [x2, z2], { height: 3, thickness: 0.2, surface: "polyhaven/painted_plaster_wall", color, base: 0, solid: true }): a wall standing on the ground (or at height base) from one point to the other, at any angle, covered in a real scanned surface at its real size. It is solid along its length, so kit.slide stops at it. Build a room from four, and leave a gap for a door. Returns a THREE.Mesh.
@@ -146,7 +151,7 @@ ${scannedModels || "  (none installed)"}
 - kit.remove(object) takes something out of the game.
 Characters:
 - kit.character(look, { at, color: "#rrggbb", scale, turn }): an animated person or creature.
-${peopleList ? `  - Real people, realistic and real size: use them for every human, the player's own character included, unless the game is a cartoon or needs a robot, ghost or creature. Pick by what they wear: a thief, burglar or spy is an ordinary person, such as Male_Adult_12 or Business_Male_01. ${peopleList}.\n  - They show a moment after the game starts (they load from the server), and also have the animations "crouch", "look" (looking around), "cheer" and "talk". c.speeds.walk and c.speeds.run (metres per second) match their feet: move them at those speeds, or call c.play("run", speed / c.speeds.run) to fit a faster run.\n  - Other looks, stylised and not human: ${otherLooks}.` : `  - Looks: ${looks}.`}
+${peopleList ? `  - Real people, realistic and real size: use them for every human, the player's own character included, unless the game is a cartoon or needs a robot, ghost or creature. Pick by what they wear: a thief, burglar or spy is an ordinary person, such as Male_Adult_12 or Business_Male_01. ${peopleList}.\n  - They appear about a second after the game starts (they load from the server; await c.ready if you need them loaded). Never build stand-in bodies for them, such as capsules or spheres in their root: those cover the real person. They also have the animations "crouch", "look" (looking around), "cheer" and "talk". c.speeds.walk and c.speeds.run (metres per second) match their feet: move them at those speeds, or call c.play("run", speed / c.speeds.run) to fit a faster run.\n  - Other looks, stylised and not human: ${otherLooks}.` : `  - Looks: ${looks}.`}
 - It returns c: move and turn c.root (a THREE.Group) yourself, and call c.play("idle" | "walk" | "run") to match. c.face(x, z) turns it toward a point; c.height is its height.
 - A character faces +z when its root.rotation.y is 0, so moving forward is position += (sin(rotation.y), 0, cos(rotation.y)) × speed × dt.
 Camera:
