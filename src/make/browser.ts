@@ -39,6 +39,7 @@ export class Browser {
   #socket: WebSocket;
   #profile: string;
   #pending = new Map<number, (reply: Reply) => void>();
+  #listeners = new Map<string, ((params: Record<string, any>) => void)[]>();
   #next = 1;
 
   private constructor(edge: ChildProcess, socket: WebSocket, profile: string) {
@@ -47,6 +48,7 @@ export class Browser {
     this.#profile = profile;
     socket.addEventListener("message", (event) => {
       const reply = JSON.parse(String(event.data)) as Reply;
+      if (reply.method) for (const listener of this.#listeners.get(reply.method) ?? []) listener(reply.params ?? {});
       if (reply.id && this.#pending.has(reply.id)) {
         this.#pending.get(reply.id)!(reply);
         this.#pending.delete(reply.id);
@@ -86,6 +88,11 @@ export class Browser {
     await browser.send("Runtime.enable");
     await browser.send("Page.enable");
     return browser;
+  }
+
+  /** Calls listener for every DevTools event with this name, such as "Page.screencastFrame". */
+  on(method: string, listener: (params: Record<string, any>) => void) {
+    this.#listeners.set(method, [...(this.#listeners.get(method) ?? []), listener]);
   }
 
   send(method: string, params: Record<string, unknown> = {}): Promise<Reply> {

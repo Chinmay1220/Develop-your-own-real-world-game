@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Speak Any Game</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+  <style>
+    html, body { margin: 0; height: 100%; background: #05060a; color: #f1f3f8; font-family: Inter, system-ui, sans-serif; overflow: hidden; }
+    #aurora { position: absolute; inset: 0; opacity: 0.95; }
+    .card { position: relative; z-index: 1; height: 100%; display: grid; place-content: center; text-align: center; padding: 0 8vw; }
+    h1 { margin: 0; font-family: "Space Grotesk", sans-serif; font-weight: 700; font-size: 112px; letter-spacing: -0.04em; line-height: 1; }
+    p { margin: 22px auto 0; max-width: 980px; font-size: 30px; line-height: 1.35; color: #d6dbe6; }
+    .models { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; margin-top: 34px; }
+    .models span { padding: 9px 18px; border-radius: 999px; border: 1px solid rgba(255,255,255,.18); background: rgba(10,12,20,.45); backdrop-filter: blur(8px); font-size: 20px; }
+    .models b { color: #f5b942; font-weight: 600; }
+    .small { margin-top: 30px; font-size: 18px; color: #9aa3b5; }
+    .small b { color: #e2e6ee; font-weight: 600; }
+  </style>
+</head>
+<body>
+  <div id="aurora"></div>
+  <div class="card" id="card"></div>
+  <script type="module">
+    // Title and closing cards for the demo video: ?card=title or ?card=end
+    import { aurora } from "../design/aurora.js";
+    import { shinyText } from "../design/text.js";
+    const card = new URLSearchParams(location.search).get("card") ?? "title";
+    document.getElementById("card").innerHTML =
+      card === "title"
+        ? `<h1 id="name">Speak Any Game</h1>
+           <p>Say any game. Meta's AI builds it, fills it with a real world, and runs it while you play.</p>
+           <div class="models"><span><b>Muse Wonder</b> writes it</span><span><b>Muse Spark</b> runs the world</span><span><b>Muse Voice</b> hears you</span><span><b>Muse Image</b> paints</span></div>`
+        : `<h1 id="name">Say any game.<br>Play it.</h1>
+           <div class="models"><span><b>Muse Wonder</b> writes, reviews and teaches</span><span><b>Muse Spark</b> world model and minds</span><span><b>Muse Voice</b> speech</span><span><b>Muse Image</b> No Engine and Rewind</span></div>
+           <p class="small"><b>Real assets:</b> Poly Haven (CC0) scanned models, surfaces and skies · Microsoft Rocketbox (MIT) people<br><b>Design:</b> React Bits · Fancy Components · COBE &nbsp;·&nbsp; <b>Code:</b> github.com/Chinmay1220/Develop-your-own-real-world-game<br>Meta Global AI Developer Hackathon 2026 · Indie · Push the Frontier</p>`;
+    aurora(document.getElementById("aurora"), { colorStops: ["#e0731e", "#7c5cff", "#f5b942"], amplitude: 1.2, blend: 0.55, height: 0.62, layers: 2, glow: 0.8, speed: 0.8 });
+    shinyText(document.getElementById("name"), { color: "#eef1f7", shineColor: "#ffd27a", speed: 2.6, delay: 1.4, shineWidth: 26 });
+  </script>
+</body>
+</html>
