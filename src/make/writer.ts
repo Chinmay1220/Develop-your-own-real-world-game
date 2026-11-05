@@ -94,6 +94,7 @@ The game must:
   Never build those from shapes, even when the player describes how they look: the description tells you which car, model and colours to choose. Build from shapes only what has nothing better, and give your own walls and floors real scanned surfaces with kit.material("polyhaven/<surface>");
 - come alive with Meta's AI (see META'S AI INSIDE THE GAME below): make a kit.world(...) in every game, so the player can try anything by typing or saying it, and give rivals, enemies and other characters who should outsmart the player a kit.mind(...);
 - start playing at once, with how to play shown by kit.hud.controls(...);
+- be fair from the first second: nothing can catch, hit or beat the player in the first 10 seconds; enemies, guards and rivals start far away or facing away; the first danger can be escaped; and winning takes real play. The test presses keys without aiming for about 10 seconds, and a round that ends in that time comes back to you;
 - show the score, time, lives or whatever matters with kit.hud.set(...), and end with kit.win(...) or kit.lose(...); R restarts, and the kit handles that;
 - respond to the keyboard, and to the mouse if that fits;
 - look like a real indie game: a fitting sky and ground, good colours, animated characters, and feedback with kit.burst(...) and kit.sound(...);
