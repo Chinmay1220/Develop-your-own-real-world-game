@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Ground repetition test</title>
+  <style>html,body{margin:0;height:100%;overflow:hidden;background:#000}canvas{display:block}.note{position:fixed;top:10px;color:#fff;font:600 15px system-ui;text-shadow:0 1px 4px #000}</style>
+  <script type="importmap">{ "imports": { "three": "https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js", "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/" } }</script>
+</head>
+<body>
+  <div class="note" style="left:14px">Plain repeat</div>
+  <div class="note" style="right:14px">Repeat broken up</div>
+  <script type="module">
+    // A look test for real scanned grounds: the same Poly Haven surface at its real size, repeated plainly
+    // (left) and with the repetition broken up (right). ?surface=<id>&metres=<real size>
+    import * as THREE from "three";
+    import { breakUpRepetition } from "../kit/notile.js";
+
+    const params = new URLSearchParams(location.search);
+    const id = params.get("surface") ?? "cobblestone_floor_01";
+    const metres = Number(params.get("metres") ?? 1);
+    const files = (kind) => `https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/${id}/${id}_${kind}_1k.jpg`;
+
+    const renderer = new THREE.WebGLRenderer({ antialias: true });
+    renderer.setSize(innerWidth, innerHeight);
+    renderer.toneMapping = THREE.NeutralToneMapping;
+    document.body.append(renderer.domElement);
+    const scene = new THREE.Scene();
+    scene.background = new THREE.Color("#9db4c8");
+    scene.add(new THREE.HemisphereLight("#dfe8f5", "#5a5040", 1.2));
+    const sun = new THREE.DirectionalLight("#fff4e0", 2.2);
+    sun.position.set(-20, 30, 10);
+    scene.add(sun);
+
+    const loader = new THREE.TextureLoader();
+    const load = (kind, colour) => {
+      const texture = loader.load(files(kind));
+      texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
+      texture.anisotropy = renderer.capabilities.getMaxAnisotropy();
+      if (colour) texture.colorSpace = THREE.SRGBColorSpace;
+      texture.repeat.set(40 / metres, 40 / metres);
+      return texture;
+    };
+    const ground = (x, broken) => {
+      const material = new THREE.MeshStandardMaterial({ map: load("diff", true), normalMap: load("nor_gl"), roughnessMap: load("rough") });
+      if (broken) breakUpRepetition(material);
+      const mesh = new THREE.Mesh(new THREE.PlaneGeometry(40, 40), material);
+      mesh.rotation.x = -Math.PI / 2;
+      mesh.position.x = x;
+      scene.add(mesh);
+    };
+    ground(-20.5, false);
+    ground(20.5, true);
+
+    const camera = new THREE.PerspectiveCamera(50, innerWidth / innerHeight, 0.1, 500);
+    if (params.get("view") === "close") {
+      camera.position.set(0, 1.7, 12);
+      camera.lookAt(0, 0, 4);
+    } else {
+      camera.position.set(0, 26, 34);
+      camera.lookAt(0, 0, -2);
+    }
+    THREE.DefaultLoadingManager.onLoad = () => setTimeout(() => (window.ready = true), 300);
+    renderer.setAnimationLoop(() => renderer.render(scene, camera));
+  </script>
+</body>
+</html>

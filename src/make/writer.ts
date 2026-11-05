@@ -32,6 +32,11 @@ const things = Object.entries(CATALOG)
 const looks = Object.entries(LOOKS)
   .map(([look, text]) => `${look} (${text})`)
   .join(", ");
+const HUMAN_LOOKS = ["thief", "kid", "guard", "soldier"]; // stylised people: real people replace them
+const otherLooks = Object.entries(LOOKS)
+  .filter(([look]) => !HUMAN_LOOKS.includes(look))
+  .map(([look, text]) => `${look} (${text})`)
+  .join(", ");
 
 // Real 3D models by artists (public/models), grouped by pack, with their size at scale 1.
 const MANIFEST = join(ROOT, "public", "models", "manifest.json");
@@ -99,6 +104,7 @@ The game must:
 - show the score, time, lives or whatever matters with kit.hud.set(...), and end with kit.win(...) or kit.lose(...); R restarts, and the kit handles that;
 - respond to the keyboard, and to the mouse if that fits;
 - look like a real indie game: a fitting sky and ground, good colours, animated characters, and feedback with kit.burst(...) and kit.sound(...);
+- at night and indoors, be lit by real lamps (kit.lamp, or Poly Haven lamp models, which light up by themselves): street lamps, lanterns, lit windows, signs and torches, with darker places between them. Night skies are dim, so a night game without lamps is too dark. Don't add your own AmbientLight, HemisphereLight or extra sun: they flatten the picture, so light dark places with lamps instead;
 - run smoothly: about 400 meshes at most, so reuse geometries and materials when making many things;
 - never crash: check that things exist before using them, and stop gameplay once kit.over is true;
 - be visible: custom surfaces built from BufferGeometry, such as roads, tracks and paths, often face down by mistake and vanish when seen from above, so give their materials side: THREE.DoubleSide.
@@ -111,7 +117,7 @@ Keys and mouse:
 - kit.pointer.x and .y (from -1 to 1), .down, .clicked (this frame only), .ray() (a THREE.Raycaster), .groundPoint(y = 0) (a THREE.Vector3 on the ground, or null).
 World:
 - kit.sky(preset): "day" (the default), "sunset", "night", "space", "underwater" or "indoor". It sets the background, fog and lights, including a sun with shadows.
-- await kit.sky("real") or await kit.sky("polyhaven/<sky>") instead gives a real photographed 360° sky, with true light, reflections and the sun (and its shadows) where it is in the photo. Use one for every realistic game. Pick a sky that fits the time and place; "_puresky" skies show only sky, the others show a real place at the horizon. Indoors, an indoor sky lights the room realistically (your walls hide the photo). Poly Haven skies:
+- await kit.sky("real") or await kit.sky("polyhaven/<sky>") instead gives a real photographed 360° sky, with true light, reflections and the sun (and its shadows) where it is in the photo. Use one for every realistic game. Night skies give dim moonlight, so light night games with lamps. Pick a sky that fits the time and place; "_puresky" skies show only sky, the others show a real place at the horizon. Indoors, an indoor sky lights the room realistically (your walls hide the photo). Poly Haven skies:
 ${scannedSkies || "  (none listed)"}
 - kit.ground({ type, size, at, metres }): a flat square, 200 m by default. "grass", "asphalt", "gravel" and every Poly Haven surface ("polyhaven/<surface>") are real scanned surfaces; metres is how far one copy reaches. "sand", "snow", "dirt", "stone", "tiles", "planks", "road", "water", "lava", "ice" and "metal" are only drawn, so prefer a real surface. Returns the mesh.
 - kit.material(name, { metres, color }) gives a real scanned surface ("asphalt", "grass", "gravel" or "polyhaven/<surface>") for your own three.js geometry such as paths and curved shapes; its UVs must be in metres (BoxGeometry and PlaneGeometry UVs go 0 to 1, so set metres to the size of the face, or scale the UVs). For boxes and cylinders, kit.shape with surface does this for you. Poly Haven surfaces, by kind (there are more of each):
@@ -126,6 +132,7 @@ ${scannedSurfaces || "  (none listed)"}
 - kit.effects.speed (0 to 1) adds motion blur, so set it from the speed in fast games. kit.effects.vignette (0 to 1, 0.3 by default) darkens the corners.
 - kit.shape(kind, { size: [w, h, d], color: "#rrggbb", at: [x, y, z], rotate: [x, y, z], material, glow, solid, opacity, surface }): a "box", "rounded" (soft edges), "sphere", "capsule", "cylinder", "cone" or "torus". at is its centre. material is "plastic" (the default), "paint" (glossy, like a car), "metal", "chrome", "glass", "rubber", "matte" or "glow". surface: "polyhaven/<surface>" covers it with a real scanned surface instead, at its real size on every face (bricks stay brick-sized on a long wall and a thin pillar), and color then tints it. Returns a THREE.Mesh. The scene has real sky lighting and reflections, so pick materials that show them off.
 - kit.wall([x1, z1], [x2, z2], { height: 3, thickness: 0.2, surface: "polyhaven/painted_plaster_wall", color, base: 0, solid: true }): a wall standing on the ground (or at height base) from one point to the other, at any angle, covered in a real scanned surface at its real size. It is solid along its length, so kit.slide stops at it. Build a room from four, and leave a gap for a door. Returns a THREE.Mesh.
+- kit.lamp([x, y, z], { color: "#ffd6a0", power: 1, reach: 16, bulb: true }) is a real light that lights the ground, walls and people around it, with a small glowing bulb. Put street lamps about 4.5 m up, every 15 to 25 m. kit.lamp(object, { offset: [x, y, z] }) moves with an object, such as a guard's torch or a car's headlights. Use as many as the place needs (the nearest few get real light). It returns lamp: set lamp.on = false to switch it off (cutting the power, a broken bulb), and true to switch it on again. Poly Haven lamp models (street_lamp_01, Lantern_01, Chandelier_01 and the other lighting models) light up by themselves; pass light: false to kit.model to keep one dark.
 - kit.thing(kind, { at: [x, y, z], turn, scale, style, solid }): a ready-made thing with its base at at. It is solid by default. Returns a THREE.Group. Kinds and sizes (width × depth × height): ${things}.
 - kit.label(text, { at, color, size }): floating text. Returns a sprite.
 Real 3D models: made by artists, so they look far better than anything built from shapes. Whenever a model fits, use it instead of building that thing yourself.
@@ -139,7 +146,7 @@ ${scannedModels || "  (none installed)"}
 - kit.remove(object) takes something out of the game.
 Characters:
 - kit.character(look, { at, color: "#rrggbb", scale, turn }): an animated person or creature.
-${peopleList ? `  - Real people, realistic and real size: use them for every human, the player's own character included, unless the game is a cartoon or needs a robot, ghost or creature. Pick by what they wear (a thief or spy can be someone in dark or plain clothes). ${peopleList}.\n  - They show a moment after the game starts (they load from the server), and also have the animations "crouch", "look" (looking around), "cheer" and "talk". c.speeds.walk and c.speeds.run (metres per second) match their feet: move them at those speeds, or call c.play("run", speed / c.speeds.run) to fit a faster run.\n  - Other looks, stylised: ${looks}.` : `  - Looks: ${looks}.`}
+${peopleList ? `  - Real people, realistic and real size: use them for every human, the player's own character included, unless the game is a cartoon or needs a robot, ghost or creature. Pick by what they wear: a thief, burglar or spy is an ordinary person, such as Male_Adult_12 or Business_Male_01. ${peopleList}.\n  - They show a moment after the game starts (they load from the server), and also have the animations "crouch", "look" (looking around), "cheer" and "talk". c.speeds.walk and c.speeds.run (metres per second) match their feet: move them at those speeds, or call c.play("run", speed / c.speeds.run) to fit a faster run.\n  - Other looks, stylised and not human: ${otherLooks}.` : `  - Looks: ${looks}.`}
 - It returns c: move and turn c.root (a THREE.Group) yourself, and call c.play("idle" | "walk" | "run") to match. c.face(x, z) turns it toward a point; c.height is its height.
 - A character faces +z when its root.rotation.y is 0, so moving forward is position += (sin(rotation.y), 0, cos(rotation.y)) × speed × dt.
 Camera:

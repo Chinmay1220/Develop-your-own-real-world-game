@@ -16,6 +16,7 @@ import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
 import { RGBELoader } from "three/addons/loaders/RGBELoader.js";
 import { buildF1Car } from "./f1car.js";
 import { createLive } from "./live.js";
+import { breakUpRepetition } from "./notile.js";
 import { loadCharacters, makeCharacter, play } from "../characters.js";
 import { floorTexture, label as makeLabel, makeThing } from "../level-builder.js";
 
@@ -201,6 +202,9 @@ export async function startKit({ catalog, models = {} }) {
   let paused = false; // while the player types something for the world model
   let skyParts = [];
   let sun = null;
+  const lamps = []; // every lamp; only the nearest few get one of the real lights below
+  const lampLights = [];
+  const LAMP_LIGHTS = 6;
 
   // Controls -------------------------------------------------------------
   const held = new Set();
@@ -382,7 +386,28 @@ export async function startKit({ catalog, models = {} }) {
       copy.repeat.set(repeat, repeat);
       return copy;
     });
-    return new THREE.MeshStandardMaterial({ map, normalMap, roughnessMap, roughness: roughnessMap ? 1 : 0.8, color: color ?? 0xffffff, side: THREE.DoubleSide });
+    // A tint keeps its colour but may not make the surface dark: a near-black surface shows only the sky
+    // reflected in it, which looks like a mirror instead of brick or asphalt.
+    const tint = new THREE.Color(color ?? 0xffffff);
+    const hsl = tint.getHSL({}, THREE.SRGBColorSpace);
+    if (hsl.l < 0.55) tint.setHSL(hsl.h, hsl.s, 0.55, THREE.SRGBColorSpace);
+    return new THREE.MeshStandardMaterial({ map, normalMap, roughnessMap, roughness: roughnessMap ? 1 : 0.8, color: tint, side: THREE.DoubleSide });
+  }
+
+  /**
+   * The surface to use for a name: itself when it exists, or for a made-up Poly Haven name such as
+   * "polyhaven/brick_wall_007" the closest real one ("polyhaven/brick_wall_001"). null when nothing fits.
+   */
+  function knownSurface(name) {
+    if (typeof name !== "string") return null;
+    if (isSurface(name)) return name;
+    if (!name.startsWith(POLYHAVEN) || !polyhaven) return null;
+    const stem = (id) => id.toLowerCase().replace(/[_-]?\d+$/, "");
+    const wanted = stem(name.slice(POLYHAVEN.length));
+    const ids = Object.keys(polyhaven.surfaces);
+    const match = ids.find((id) => stem(id) === wanted) ?? ids.find((id) => stem(id).startsWith(wanted)) ?? ids.find((id) => id.startsWith(`${wanted.split("_")[0]}_`));
+    if (match) console.warn(`kit: no surface "${name}", using "${POLYHAVEN}${match}"`);
+    return match ? POLYHAVEN + match : null;
   }
 
   /** The canvas picture for red and white kerbs, or a chequered line. */
@@ -461,8 +486,12 @@ export async function startKit({ catalog, models = {} }) {
     return settings.clearcoat ? new THREE.MeshPhysicalMaterial(settings) : new THREE.MeshStandardMaterial(settings);
   }
 
-  /** A real photographed sky: it lights the scene, shows in reflections, and sets where the sun is. */
-  async function realSky(url = REAL_SKY) {
+  /**
+   * A real photographed sky: it lights the scene, shows in reflections, and sets where the sun is.
+   * tags are Poly Haven's words for the photo: at "night", "indoor" or "overcast" the brightest point is a
+   * lamp, a window or bright cloud rather than the sun, so the light is softer and comes from high above.
+   */
+  async function realSky(url = REAL_SKY, tags = []) {
     const texture = await new RGBELoader().setDataType(THREE.FloatType).loadAsync(url);
     texture.mapping = THREE.EquirectangularReflectionMapping;
     // The sun is the brightest point of the photo. The first row of the picture is the top of the sky.
@@ -481,15 +510,32 @@ export async function startKit({ catalog, models = {} }) {
     const row = Math.floor(height / 2) - 3;
     for (let x = 0; x < width; x += 8) for (let c = 0; c < 3; c++) horizon[c] += data[(row * width + x) * 4 + c] / (width / 8);
     const brightestPart = Math.max(...horizon, 1);
+    const night = tags.includes("night");
+    const soft = night || tags.includes("indoor") || tags.includes("studio") || tags.includes("overcast");
+    if (soft) {
+      const around = new THREE.Vector2(toSun.x, toSun.z).normalize();
+      toSun.set(around.x * Math.cos(0.9), Math.sin(0.9), around.y * Math.cos(0.9)); // 52 degrees up, from the same side
+    }
+    // Poly Haven photographs night almost as brightly as day, so night light is set to one dim level.
+    let skyLight = 0; // light reaching flat ground from the sky
+    for (let y = 0; y < height / 2; y++) {
+      const up = (0.5 - (y + 0.5) / height) * Math.PI;
+      const weight = Math.sin(up) * Math.cos(up);
+      for (let x = 0; x < width; x += 4) {
+        const i = (y * width + x) * 4;
+        skyLight += (0.2126 * data[i] + 0.7152 * data[i + 1] + 0.0722 * data[i + 2]) * weight;
+      }
+    }
+    skyLight *= (Math.PI / height) * ((2 * Math.PI) / width) * 4;
 
     for (const part of skyParts) scene.remove(part);
     scene.background = texture;
-    scene.backgroundIntensity = 1;
+    scene.backgroundIntensity = night ? 0.75 : 1;
     scene.backgroundBlurriness = 0;
     scene.environment = pmrem.fromEquirectangular(texture).texture;
-    scene.environmentIntensity = 1;
+    scene.environmentIntensity = night ? Math.min(1.2, Math.max(0.15, 0.4 / Math.max(skyLight, 0.01))) : 1;
     scene.fog = new THREE.Fog(new THREE.Color(...horizon.map((value) => value / brightestPart)), 180, 900);
-    sun = new THREE.DirectionalLight(0xfff1dc, 3.2);
+    sun = new THREE.DirectionalLight(night ? 0x9db4ff : 0xfff1dc, night ? 0.45 : soft ? 1.1 : 3.2); // moonlight at night
     sun.userData.from = toSun.multiplyScalar(70);
     sun.position.copy(sun.userData.from);
     sun.castShadow = true;
@@ -560,7 +606,7 @@ export async function startKit({ catalog, models = {} }) {
       if (preset === "real") return realSky();
       if (preset.startsWith(POLYHAVEN)) {
         const id = preset.slice(POLYHAVEN.length);
-        if (polyhaven?.skies[id]) return realSky(`${POLYHAVEN_FILES}HDRIs/hdr/2k/${id}_2k.hdr`);
+        if (polyhaven?.skies[id]) return realSky(`${POLYHAVEN_FILES}HDRIs/hdr/2k/${id}_2k.hdr`, polyhaven.skies[id].categories ?? []);
         console.warn(`kit.sky: unknown Poly Haven sky "${id}"`);
         return realSky();
       }
@@ -617,9 +663,11 @@ export async function startKit({ catalog, models = {} }) {
      */
     ground({ type = "grass", size = 200, at = [0, 0, 0], metres } = {}) {
       let material;
+      type = knownSurface(type) ?? type;
       if (isSurface(type)) {
         // The scanned grass is a dry field; a little green makes it look watered and mown.
         material = realSurface(type, size / (metres ?? surfaceMetres(type) ?? (type === "grass" ? 8 : 4)), type === "grass" ? 0x9fd27c : undefined);
+        breakUpRepetition(material); // a big ground would otherwise show a grid of identical copies
       } else {
         const map = groundTexture(type);
         map.repeat.set(size / 4, size / 4);
@@ -643,8 +691,9 @@ export async function startKit({ catalog, models = {} }) {
      */
     shape(kind, { size = [1, 1, 1], color, at = [0, 0, 0], rotate = [0, 0, 0], material = "plastic", glow = false, solid = false, opacity = 1, surface: real, metres } = {}) {
       const [w, h, d] = size.map((value) => Math.max(0.002, Math.abs(Number(value) || 0))); // never flat: that breaks the lighting maths
-      const textured = typeof real === "string" && !glow && isSurface(real);
-      if (real && !textured && !glow) console.warn(`kit.shape: unknown surface "${real}"`);
+      real = glow ? null : knownSurface(real) ?? real;
+      const textured = typeof real === "string" && isSurface(real);
+      if (real && !textured) console.warn(`kit.shape: unknown surface "${real}"`);
       const sized = textured ? metreGeometry(kind, w, h, d) : null; // texture coordinates in metres
       const copy = Number(metres) || surfaceMetres(real) || 2; // metres one copy of the surface covers
       const look = textured ? realSurface(real, (sized ? 1 : Math.max(w, h, d)) / copy, color) : surface(glow ? "glow" : material, color ?? "#cccccc", opacity);
@@ -675,6 +724,53 @@ export async function startKit({ catalog, models = {} }) {
       return wall;
     },
 
+    /**
+     * A light that really lights what is around it: a street lamp, a lantern, a lit window, a torch.
+     * at is [x, y, z], or an object it moves with (offset is then where on the object). reach is how far
+     * it lights in metres. Returns the lamp: set lamp.on = false to switch it off. Any number is fine:
+     * the nearest few to the camera get real light, and the bulbs of the others still glow.
+     */
+    lamp(at, { color = "#ffd6a0", power = 1, reach = 16, bulb, offset = [0, 2, 0] } = {}) {
+      const attached = at?.isObject3D ? at : null;
+      const tint = new THREE.Color(color);
+      const glowBulb = (bulb ?? !attached) ? new THREE.Mesh(shapes.sphere, new THREE.MeshStandardMaterial({ color: tint, emissive: tint, emissiveIntensity: 4 })) : null;
+      let on = true;
+      const lamp = {
+        object: attached,
+        offset: new THREE.Vector3(...(attached ? offset : [0, 0, 0])),
+        position: new THREE.Vector3(...(attached ? [0, 0, 0] : Array.isArray(at) ? at.map(Number) : [at?.x ?? 0, at?.y ?? 0, at?.z ?? 0])),
+        color: tint,
+        power: Math.max(0, Number(power) || 1),
+        reach: Math.max(1, Number(reach) || 16),
+        bulb: glowBulb,
+        get on() {
+          return on;
+        },
+        set on(value) {
+          on = Boolean(value);
+          if (glowBulb) glowBulb.material.emissiveIntensity = on ? 4 : 0;
+        },
+        /** Where the lamp is now. */
+        where(into = new THREE.Vector3()) {
+          return attached ? attached.localToWorld(into.copy(this.offset)) : into.copy(this.position);
+        },
+      };
+      if (glowBulb) {
+        glowBulb.scale.setScalar(0.22);
+        glowBulb.position.copy(lamp.position);
+        scene.add(glowBulb);
+      }
+      lamps.push(lamp);
+      while (lampLights.length < LAMP_LIGHTS) {
+        // A fixed set of lights that move to the nearest lamps, so the scene's shaders never change.
+        const light = new THREE.PointLight(0xffffff, 0, 16, 2);
+        light.userData.lamp = null;
+        lampLights.push(light);
+        scene.add(light);
+      }
+      return lamp;
+    },
+
     /** A ready-made thing from the catalog, standing on the ground at [x, y, z]. */
     thing(kind, { at = [0, 0, 0], turn = 0, scale = 1, style = "garden", solid = true } = {}) {
       const item = catalog[kind];
@@ -697,7 +793,7 @@ export async function startKit({ catalog, models = {} }) {
      * It stands with the middle of its base at at. size sets the length of its longest side in
      * metres; otherwise scale multiplies its own size (Poly Haven models are already real size).
      */
-    async model(name, { at = [0, 0, 0], turn = 0, size, scale = 1, solid = true } = {}) {
+    async model(name, { at = [0, 0, 0], turn = 0, size, scale = 1, solid = true, light = true } = {}) {
       const scanned = name.startsWith(POLYHAVEN) ? polyhaven?.models[name.slice(POLYHAVEN.length)] : null;
       let info = scanned ?? models[name];
       const group = new THREE.Group();
@@ -731,6 +827,11 @@ export async function startKit({ catalog, models = {} }) {
       group.rotation.y = turn;
       scene.add(group);
       if (solid && info && info.size[1] * (size ? size / Math.max(...info.size) : scale) > 0.3) kit.solid(group);
+      if (light && scanned?.categories?.includes("lighting") && original) {
+        // Real lamps give real light: near the top of a street lamp, or the middle of a small lamp.
+        const tall = info.size[1] * (size ? size / Math.max(...info.size) : scale);
+        group.userData.lamp = kit.lamp(group, { offset: [0, tall > 2 ? tall - 0.3 : tall * 0.6, 0], power: Math.min(1.6, Math.max(0.25, tall / 2.5)), reach: 6 + 3 * tall, bulb: false });
+      }
       return group;
     },
     /** The names of all models, with their size at scale 1: { "racing/raceCarRed": { size: [w, h, d] }, ... }. */
@@ -742,6 +843,7 @@ export async function startKit({ catalog, models = {} }) {
      * (the surface's real size by default).
      */
     material(name, { metres, color } = {}) {
+      name = knownSurface(name) ?? name;
       if (!isSurface(name)) console.warn(`kit.material: unknown surface "${name}"`);
       return realSurface(isSurface(name) ? name : "asphalt", 1 / (Number(metres) || surfaceMetres(name) || 4), color);
     },
@@ -980,6 +1082,12 @@ export async function startKit({ catalog, models = {} }) {
     },
     /** Removes an object from the game. */
     remove(object) {
+      const lamp = lamps.find((each) => each === object || each.bulb === object || each.object === object);
+      if (lamp) {
+        lamps.splice(lamps.indexOf(lamp), 1);
+        if (lamp.bulb) scene.remove(lamp.bulb);
+        if (object === lamp) return;
+      }
       scene.remove(object);
       const index = solids.findIndex((solid) => solid.object === object);
       if (index >= 0) solids.splice(index, 1);
@@ -1017,6 +1125,36 @@ export async function startKit({ catalog, models = {} }) {
   // The loop ---------------------------------------------------------------
   const clock = new THREE.Clock();
   let frames = 0;
+  // Lamps: every 0.25 s the real lights go to the lamps nearest to what the camera looks at.
+  let lampClock = 0;
+  const lampSpot = new THREE.Vector3();
+  const lookingAt = new THREE.Vector3();
+  function placeLampLights(dt) {
+    if (lampLights.length === 0) return;
+    lampClock -= dt;
+    if (lampClock <= 0) {
+      lampClock = 0.25;
+      camera.getWorldDirection(lookingAt).setY(0).normalize().multiplyScalar(12).add(camera.position).setY(0);
+      const nearest = lamps
+        .filter((lamp) => lamp.on && lamp.power > 0)
+        .map((lamp) => ({ lamp, far: lamp.where(lampSpot).distanceTo(lookingAt) - lamp.reach * 0.5 }))
+        .sort((a, b) => a.far - b.far)
+        .slice(0, LAMP_LIGHTS);
+      lampLights.forEach((light, i) => (light.userData.lamp = nearest[i]?.lamp ?? null));
+    }
+    for (const light of lampLights) {
+      const lamp = light.userData.lamp;
+      if (!lamp || !lamp.on || !lamps.includes(lamp)) {
+        light.intensity = 0;
+        continue;
+      }
+      lamp.where(light.position);
+      light.color.copy(lamp.color);
+      light.intensity = 90 * lamp.power; // candela: a street lamp's pool is far brighter than moonlight, as in life
+      light.distance = lamp.reach;
+    }
+  }
+
   function step(dt) {
     kit.time += dt;
     for (const fn of [...updates]) {
@@ -1033,6 +1171,7 @@ export async function startKit({ catalog, models = {} }) {
       timer.fn();
     }
     for (const person of people) person.mixer?.update(dt); // real people get their mixer once they have loaded
+    placeLampLights(dt);
     for (const bit of [...particles]) {
       bit.age += dt;
       bit.velocity.y -= 9.8 * dt;

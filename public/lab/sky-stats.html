@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Sky light measurements</title>
+  <script type="importmap">{ "imports": { "three": "https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js", "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/" } }</script>
+</head>
+<body>
+  <pre id="out">measuring…</pre>
+  <script type="module">
+    // Measures Poly Haven skies: the light reaching flat ground from the whole sky, and from its sun
+    // (the brightest spot), to set the kit's sun strength from the photo. ?skies=a,b,c
+    import * as THREE from "three";
+    import { RGBELoader } from "three/addons/loaders/RGBELoader.js";
+
+    const ids = (new URLSearchParams(location.search).get("skies") ?? "").split(",").filter(Boolean);
+    const loader = new RGBELoader().setDataType(THREE.FloatType);
+    const rows = [];
+    for (const id of ids) {
+      try {
+        const { image } = await loader.loadAsync(`https://dl.polyhaven.org/file/ph-assets/HDRIs/hdr/1k/${id}_1k.hdr`);
+        const { data, width, height } = image;
+        const lum = (i) => 0.2126 * data[i * 4] + 0.7152 * data[i * 4 + 1] + 0.0722 * data[i * 4 + 2];
+        let brightest = 0;
+        let at = 0;
+        for (let i = 0; i < width * height; i++) if (lum(i) > brightest) (brightest = lum(i)), (at = i);
+        const sunRow = Math.floor(at / width);
+        const sunCol = at % width;
+        const sunUp = (0.5 - (sunRow + 0.5) / height) * Math.PI; // latitude
+        let ground = 0; // light on flat ground from the upper half of the sky
+        let sun = 0; // light from the sun's disc (within 3 degrees of the brightest point), facing it
+        const toSun = [Math.cos(sunUp) * Math.cos(0), Math.sin(sunUp), 0];
+        for (let y = 0; y < height / 2; y++) {
+          const up = (0.5 - (y + 0.5) / height) * Math.PI;
+          const solid = Math.cos(up) * (Math.PI / height) * ((2 * Math.PI) / width);
+          for (let x = 0; x < width; x++) {
+            const i = y * width + x;
+            const L = lum(i);
+            ground += L * Math.sin(up) * solid;
+            const around = ((x - sunCol) / width) * Math.PI * 2;
+            const cosAngle = Math.sin(up) * Math.sin(sunUp) + Math.cos(up) * Math.cos(sunUp) * Math.cos(around);
+            if (cosAngle > Math.cos((3 * Math.PI) / 180)) sun += L * solid;
+          }
+        }
+        rows.push({ id, brightest: +brightest.toFixed(2), sunHeightDeg: Math.round((sunUp * 180) / Math.PI), ground: +ground.toFixed(3), sun: +sun.toFixed(3), sunShare: +(sun * Math.max(0, Math.sin(sunUp)) / ground).toFixed(3) });
+      } catch (error) {
+        rows.push({ id, error: String(error) });
+      }
+      document.getElementById("out").textContent = rows.map((row) => JSON.stringify(row)).join("\n");
+    }
+    window.stats = rows;
+    window.ready = true;
+  </script>
+</body>
+</html>

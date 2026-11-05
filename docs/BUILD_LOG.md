@@ -1385,6 +1385,47 @@ Fixed along the way:
 |---|---|
 | ![Courtyard](images/walls-courtyard.png) | ![Close](images/walls-close.png) |
 
+## Step 34: Real night light, lamps, and fixes from a new game
+
+**The test:** "Midnight Heist NYC" was made again with the rules from steps 32 and 33. The prompt was the same: "A police chase through New York streets at night: I'm a thief running from two police officers who learn my shortcuts."
+
+**Result:** it works after 3 versions, in 3.3 minutes, for $0.73.
+- **The new rules worked:**
+  - Muse Wonder added a 10-second grace period, and the police start 26–31 m away. The tester found no unfair early end.
+  - Boundary walls used `kit.wall`, buildings used real brick, concrete and plaster, and streets used real asphalt.
+- **It showed five new problems:**
+
+| Problem | Cause | Fix |
+|---|---|---|
+| Roads and walls looked like smeared mirrors of the sky photo. | The writer tinted asphalt nearly black (`#2c3340`), so only the photo's reflection showed. | A tint on a real surface keeps its colour but cannot make the surface darker than mid-brightness. |
+| A building was a plain teal box. | The writer named a surface that doesn't exist (`brick_wall_007`). | The kit uses the closest real surface (`brick_wall_001`) and logs a warning. |
+| Night looked like day, with hard sun shadows. | Every photographed sky added a full-strength sun (3.2) at its brightest point. At night that point is a street lamp. Poly Haven also exposes night photos almost as brightly as day ones: they light the ground at 0.3–2.1, against 2–4 by day (measured on 18 skies). | The sky's own tags decide. Night gets dim, bluish moonlight from high above, and the light from the sky is set to one dim level. Overcast and indoor skies get soft light from above. Day keeps its sun. |
+| Night games had no real light. | The kit had no lights. | `kit.lamp`, below. |
+| The player was the stylised "thief" mannequin. | The writer was offered "thief: a person in a black stealth suit". | When real people exist, the writer is offered only stylised looks that aren't human (robot, ghost, animals). A thief, burglar or spy is an ordinary person. |
+
+**New in the kit:**
+- **`kit.lamp([x, y, z], { color, power, reach })`** is a real light with a glowing bulb.
+  - It can also follow an object, such as a guard's torch.
+  - `lamp.on = false` switches it off, so the world model can cut the power.
+  - Any number of lamps can be used. 6 real lights move every 0.25 s to the lamps nearest to what the camera sees, so the scene's shaders never change.
+- **Poly Haven lamp models light up by themselves.** These are the 29 "lighting" models, such as `street_lamp_01`, `Lantern_01` and `Chandelier_01`.
+- **Big grounds no longer show a grid of identical copies.** Each patch of ground uses the texture shifted by a different amount, blended smoothly into the next (Inigo Quilez's texture-repetition technique), and colour, bumps and roughness shift together.
+- **The writer is told:**
+  - light night and indoor games with lamps, with darker places between them;
+  - don't add an ambient light, which flattens the picture.
+
+**Checked:**
+- A hand-made night street: 4 Poly Haven street lamps lit by themselves, a lit shop window, a red sign, and real people.
+- The daytime courtyard from step 33 looks the same as before.
+
+| Night street (hand-made) | Ground: plain repeat (left) and broken up (right) |
+|---|---|
+| ![Night street](images/night-street.png) | ![Ground](images/ground-repeat.png) |
+
+| The NYC road before the tint fix | After |
+|---|---|
+| ![Before](images/tint-before.png) | ![After](images/tint-after.png) |
+
 ## Final check
 
 Run these from the project folder to repeat the checks:
