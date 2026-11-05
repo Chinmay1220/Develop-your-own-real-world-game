@@ -16,6 +16,7 @@ interface AssetInfo {
   name: string;
   categories?: string[];
   polycount?: number;
+  dimensions?: number[]; // textures: the real width and height one copy covers, in millimetres
 }
 interface FileLink {
   url: string;
@@ -153,8 +154,8 @@ async function main() {
     }
   });
 
-  // Surfaces: colour, bump (OpenGL normal) and roughness maps at 1k.
-  const textures: Record<string, { name: string; categories: string[]; map: string; normal: string | null; rough: string | null }> = {};
+  // Surfaces: colour, bump (OpenGL normal) and roughness maps at 1k, and how many metres one copy covers.
+  const textures: Record<string, { name: string; categories: string[]; map: string; normal: string | null; rough: string | null; metres: number | null }> = {};
   const allTextures = await get<Record<string, AssetInfo>>(`${API}/assets?t=textures`);
   done = 0;
   await each(Object.entries(allTextures), 8, async ([id, info]) => {
@@ -163,7 +164,8 @@ async function main() {
       const pick = (...names: string[]) => names.map((name) => files[name]?.["1k"]?.jpg?.url).find(Boolean);
       const map = pick("Diffuse", "diff", "Color");
       if (!map) return;
-      textures[id] = { name: info.name, categories: categoriesOf(info), map: short(map), normal: short(pick("nor_gl", "Normal") ?? "") || null, rough: short(pick("Rough", "rough") ?? "") || null };
+      const width = info.dimensions?.[0] ?? 0;
+      textures[id] = { name: info.name, categories: categoriesOf(info), map: short(map), normal: short(pick("nor_gl", "Normal") ?? "") || null, rough: short(pick("Rough", "rough") ?? "") || null, metres: width > 0 ? Math.round(width / 10) / 100 : null };
     } catch (error) {
       console.log(`  skipped texture ${id}: ${(error as Error).message}`);
     } finally {

@@ -1349,6 +1349,42 @@ Fixed along the way:
 |---|---|---|---|
 | ![Making](images/final-making.png) | ![Playing](images/final-heist-playing.png) | ![AI](images/final-heist-ai.png) | ![Gallery](images/final-gallery.png) |
 
+## Step 32: Fair starts: the tester sends back games that end in seconds
+
+**The problem:** "Midnight Heist NYC" caught the player within seconds of starting, before a person could do anything.
+
+**The fix:**
+- **The tester:** it notes when the game starts. If the round has already ended (win or lose) after its first 10 seconds of blind key presses, the game goes back to Muse Wonder with the reason, for example "The round ended only 5 s after the game started… Give the player a fair start".
+- **The writer** gets a new rule: nothing can catch, hit or beat the player in the first 10 seconds. Enemies start far away or facing away, the first danger can be escaped, and winning takes real play.
+
+**Result:** run again on `midnight-heist-nyc-chase`, the tester reported "The round ended … only 5 s after the game started", so the writer would now fix the game before anyone plays it.
+
+## Step 33: Real walls and buildings
+
+**The problem:** walls, pillars and buildings in made games were plain coloured boxes. That is what made them look cheap next to the real scanned models and people.
+
+**What changed:**
+- **`kit.shape(..., { surface: "polyhaven/<surface>" })`** covers a shape with a real scanned surface. A box or cylinder gets texture coordinates in metres on every face, so bricks stay brick-sized on a 14 m wall and on a 0.8 m pillar.
+- **`kit.wall([x1, z1], [x2, z2], { height, thickness, surface })`** builds a wall between two points, at any angle, in a real surface (painted plaster by default).
+  - **Collisions:** walls block along their real line. Before, a slanted wall would have blocked the whole square around it.
+- **Real sizes:** Poly Haven gives every surface's real size, for example red brick 1.4 m per copy, cobblestones 1 m and plaster 2 m.
+  - The index now stores it for 862 of 863 surfaces.
+  - Shapes, walls, `kit.material` and the ground use it by default.
+- **The writer** is told to build walls, rooms, corridors, fences and buildings with `kit.wall`, and to give every box, pillar, platform, step and floor a real surface. Plain coloured boxes are never used for architecture.
+
+**The test:** a hand-made courtyard:
+- red brick, plaster with a doorway, slanted concrete, and a corrugated iron fence;
+- marble and castle-brick pillars, wooden crates;
+- a real person walking into the slanted wall.
+
+**Result:**
+- **Every surface showed at its real size.**
+- **The person stopped 0.56 m from the slanted wall's centre line.** The expected gap is 0.55 m: half the wall's 0.3 m thickness, plus the person's 0.4 m radius.
+
+| The courtyard from above | Close up, behind the player |
+|---|---|
+| ![Courtyard](images/walls-courtyard.png) | ![Close](images/walls-close.png) |
+
 ## Final check
 
 Run these from the project folder to repeat the checks:

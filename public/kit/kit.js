@@ -364,6 +364,8 @@ export async function startKit({ catalog, models = {} }) {
     const info = polyhaven.surfaces[name.slice(POLYHAVEN.length)];
     return [info.map, info.normal, info.rough].map((path) => path && POLYHAVEN_FILES + path);
   }
+  /** How many metres one copy of a Poly Haven surface covers in real life (null when unknown). */
+  const surfaceMetres = (name) => (name?.startsWith?.(POLYHAVEN) ? polyhaven?.surfaces[name.slice(POLYHAVEN.length)]?.metres ?? null : null);
   /** repeat: how many copies of the texture fit across one unit of the geometry's UVs. */
   function realSurface(name, repeat, color) {
     surfaceTextures[name] ??= surfaceFiles(name).map((url, i) => {
@@ -419,6 +421,39 @@ export async function startKit({ catalog, models = {} }) {
     paint: { roughness: 0.32, metalness: 0.25, clearcoat: 1, clearcoatRoughness: 0.06 },
     glass: { roughness: 0.04, metalness: 0.1, transparent: true, opacity: 0.35 },
   };
+  /**
+   * A box or cylinder of this size whose texture coordinates are in metres, so a real surface keeps its true
+   * scale on every face (bricks stay brick-sized on a long wall and on a short pillar).
+   */
+  function metreGeometry(kind, w, h, d) {
+    if (kind === "cylinder" || kind === "cone") {
+      const geometry = (kind === "cone" ? new THREE.ConeGeometry(0.5, h, 32) : new THREE.CylinderGeometry(0.5, 0.5, h, 32)).scale(w, 1, d);
+      const uv = geometry.attributes.uv;
+      const side = 33 * 2; // the side's points come first, then the round ends
+      const around = (Math.PI * (w + d)) / 2;
+      for (let i = 0; i < uv.count; i++) uv.setXY(i, uv.getX(i) * (i < side ? around : w), uv.getY(i) * (i < side ? h : d));
+      return geometry;
+    }
+    if (kind !== "box" && kind !== "rounded") return null; // round shapes keep their own texture coordinates
+    const geometry = kind === "rounded" ? new RoundedBoxGeometry(w, h, d, 3, 0.12) : new THREE.BoxGeometry(w, h, d);
+    const uv = geometry.attributes.uv;
+    const perFace = uv.count / 6;
+    const faces = [[d, h], [d, h], [w, d], [w, d], [w, h], [w, h]]; // ±x, ±y, ±z: each face's width and height
+    for (let i = 0; i < uv.count; i++) {
+      const [across, up] = faces[Math.floor(i / perFace)];
+      uv.setXY(i, uv.getX(i) * across, uv.getY(i) * up);
+    }
+    return geometry;
+  }
+
+  /** How far the point (x, z) is from a wall's centre line, on the ground. */
+  function distanceToLine(x, z, { ax, az, bx, bz }) {
+    const lx = bx - ax;
+    const lz = bz - az;
+    const along = Math.max(0, Math.min(1, ((x - ax) * lx + (z - az) * lz) / (lx * lx + lz * lz || 1)));
+    return Math.hypot(x - (ax + lx * along), z - (az + lz * along));
+  }
+
   function surface(finish, color, opacity = 1) {
     if (finish === "glow") return new THREE.MeshStandardMaterial({ color, emissive: color, emissiveIntensity: 3, roughness: 0.4 });
     const settings = { color, ...(FINISHES[finish] ?? FINISHES.plastic) };
@@ -584,7 +619,7 @@ export async function startKit({ catalog, models = {} }) {
       let material;
       if (isSurface(type)) {
         // The scanned grass is a dry field; a little green makes it look watered and mown.
-        material = realSurface(type, size / (metres ?? (type === "grass" ? 8 : 4)), type === "grass" ? 0x9fd27c : undefined);
+        material = realSurface(type, size / (metres ?? surfaceMetres(type) ?? (type === "grass" ? 8 : 4)), type === "grass" ? 0x9fd27c : undefined);
       } else {
         const map = groundTexture(type);
         map.repeat.set(size / 4, size / 4);
@@ -602,19 +637,42 @@ export async function startKit({ catalog, models = {} }) {
     /**
      * A simple shape: "box", "rounded" (a box with soft edges), "sphere", "capsule", "cylinder", "cone" or "torus".
      * size is [width, height, depth]; at is its centre. material is "plastic" (the default), "paint" (glossy,
-     * like a car), "metal", "chrome", "glass", "rubber", "matte" or "glow".
+     * like a car), "metal", "chrome", "glass", "rubber", "matte" or "glow". surface instead covers it with a real
+     * scanned surface ("polyhaven/<id>", "grass", "asphalt" or "gravel"), at the surface's real size on every face
+     * of a box or cylinder (or one copy every `metres` metres); color then tints it.
      */
-    shape(kind, { size = [1, 1, 1], color = "#cccccc", at = [0, 0, 0], rotate = [0, 0, 0], material = "plastic", glow = false, solid = false, opacity = 1 } = {}) {
+    shape(kind, { size = [1, 1, 1], color, at = [0, 0, 0], rotate = [0, 0, 0], material = "plastic", glow = false, solid = false, opacity = 1, surface: real, metres } = {}) {
       const [w, h, d] = size.map((value) => Math.max(0.002, Math.abs(Number(value) || 0))); // never flat: that breaks the lighting maths
-      const geometry = shapes[kind] ?? shapes.box;
-      const mesh = new THREE.Mesh(geometry, surface(glow ? "glow" : material, color, opacity));
-      mesh.scale.set(w, h, d);
+      const textured = typeof real === "string" && !glow && isSurface(real);
+      if (real && !textured && !glow) console.warn(`kit.shape: unknown surface "${real}"`);
+      const sized = textured ? metreGeometry(kind, w, h, d) : null; // texture coordinates in metres
+      const copy = Number(metres) || surfaceMetres(real) || 2; // metres one copy of the surface covers
+      const look = textured ? realSurface(real, (sized ? 1 : Math.max(w, h, d)) / copy, color) : surface(glow ? "glow" : material, color ?? "#cccccc", opacity);
+      const mesh = new THREE.Mesh(sized ?? shapes[kind] ?? shapes.box, look);
+      if (!sized) mesh.scale.set(w, h, d);
       mesh.position.set(...at);
       mesh.rotation.set(...rotate);
       mesh.castShadow = mesh.receiveShadow = true;
       scene.add(mesh);
       if (solid) kit.solid(mesh);
       return mesh;
+    },
+
+    /**
+     * A wall from [x, z] to [x, z] on the ground, covered in a real scanned surface at its true size: the
+     * easy way to build rooms, corridors, buildings and fences that look real. Solid by default.
+     */
+    wall(from, to, { height = 3, thickness = 0.2, surface: real = "polyhaven/painted_plaster_wall", metres, color, base = 0, solid = true } = {}) {
+      const [ax, az] = from.map(Number);
+      const [bx, bz] = to.map(Number);
+      const length = Math.max(0.05, Math.hypot(bx - ax, bz - az));
+      const wall = kit.shape("box", { size: [length, height, thickness], at: [(ax + bx) / 2, base + height / 2, (az + bz) / 2], rotate: [0, -Math.atan2(bz - az, bx - ax), 0], surface: real, metres, color });
+      if (solid) {
+        // A slanted wall's box would block a whole square, so walls block along their line instead.
+        kit.solid(wall);
+        solids.at(-1).line = { ax, az, bx, bz, half: Math.max(0.01, thickness / 2) };
+      }
+      return wall;
     },
 
     /** A ready-made thing from the catalog, standing on the ground at [x, y, z]. */
@@ -680,11 +738,12 @@ export async function startKit({ catalog, models = {} }) {
 
     /**
      * A real scanned surface ("asphalt", "grass", "gravel" or any Poly Haven surface, "polyhaven/<id>")
-     * for your own geometry. Its UVs should be in metres: one copy of the texture covers `metres` metres.
+     * for your own geometry. Its UVs should be in metres: one copy of the texture covers `metres` metres
+     * (the surface's real size by default).
      */
-    material(name, { metres = 4, color } = {}) {
+    material(name, { metres, color } = {}) {
       if (!isSurface(name)) console.warn(`kit.material: unknown surface "${name}"`);
-      return realSurface(isSurface(name) ? name : "asphalt", 1 / metres, color);
+      return realSurface(isSurface(name) ? name : "asphalt", 1 / (Number(metres) || surfaceMetres(name) || 4), color);
     },
 
     /**
@@ -894,7 +953,11 @@ export async function startKit({ catalog, models = {} }) {
     slide(object, dx, dz, radius = 0.4) {
       const p = object.position;
       const blocked = (x, z) =>
-        solids.some(({ object: other, box }) => other !== object && box.max.y > p.y + 0.15 && box.min.y < p.y + 1.6 && x > box.min.x - radius && x < box.max.x + radius && z > box.min.z - radius && z < box.max.z + radius);
+        solids.some(({ object: other, box, line }) => {
+          if (other === object || box.max.y <= p.y + 0.15 || box.min.y >= p.y + 1.6) return false;
+          if (!line) return x > box.min.x - radius && x < box.max.x + radius && z > box.min.z - radius && z < box.max.z + radius;
+          return distanceToLine(x, z, line) < line.half + radius;
+        });
       if (!blocked(p.x + dx, p.z + dz)) {
         p.x += dx;
         p.z += dz;
