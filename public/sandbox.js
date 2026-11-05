@@ -54,6 +54,7 @@ export async function runGame(container, game, catalog, onMessage = () => {}, op
   const module = await import(url);
   if (typeof module.default !== "function") throw new Error("The game module has no default export function main(kit)");
   await module.default(kit);
+  kit.started();
 </script>
 </body></html>`;
 

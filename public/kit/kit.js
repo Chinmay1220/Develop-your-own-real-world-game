@@ -1142,6 +1142,15 @@ export async function startKit({ catalog, models = {} }) {
   // The loop ---------------------------------------------------------------
   const clock = new THREE.Clock();
   let frames = 0;
+  // A loading screen until the game has built its world: skies, models and people load from the internet.
+  const bornAt = performance.now();
+  let started = false; // the game's main(kit) has finished
+  let startedFrames = 0;
+  let readySent = false;
+  const loadingScreen = document.createElement("div");
+  loadingScreen.textContent = "Loading the world…";
+  loadingScreen.style.cssText = "position:fixed;inset:0;display:grid;place-items:center;background:#05070b;color:#c9d3e0;font:600 15px system-ui,sans-serif;letter-spacing:.04em;z-index:50;transition:opacity .5s";
+  document.body.append(loadingScreen);
   // Lamps: every 0.25 s the real lights go to the lamps nearest to what the camera looks at.
   let lampClock = 0;
   const lampSpot = new THREE.Vector3();
@@ -1216,7 +1225,16 @@ export async function startKit({ catalog, models = {} }) {
     pressed.clear();
     pointer.clicked = false;
     frames += 1;
-    if (frames === 30) report({ kind: "ready" });
+    if (started) startedFrames += 1;
+    // Ready once the game's world is built and on screen (or after 20 s, for a game that never finishes setting up).
+    if (!readySent && (startedFrames >= 20 || (frames >= 30 && performance.now() - bornAt > 20_000))) {
+      readySent = true;
+      loadingScreen.style.opacity = "0";
+      setTimeout(() => loadingScreen.remove(), 600);
+      report({ kind: "ready" });
+    }
   });
+  // Called by the sandbox when the game's main(kit) has finished setting up.
+  Object.defineProperty(kit, "started", { value: () => (started = true), enumerable: false });
   return kit;
 }

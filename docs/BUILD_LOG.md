@@ -1464,6 +1464,34 @@ Fixed along the way:
 |---|
 | ![Cars at night](images/cars-night.png) |
 
+## Step 36: A driving game on the first try, and "ready" means ready
+
+**The test:** "A night getaway: I drive the getaway car through the city streets while police cars chase me. Lose them and reach the docks."
+
+**Result:** it worked on the first version, in 1.2 minutes, for $0.24.
+- **What it used:**
+  - `kit.vehicle` for everything on the road: taxis and sedans in traffic, the player's red sedan with headlights, and police cars with their lights;
+  - a real person (`Male_Adult_08`), street lamps and a Poly Haven night street sky;
+  - 5 real walls, and no box cars, stand-in capsules or ambient lights.
+- **Meta's AI in play:**
+  - "drop an oil slick behind me" became `drop_oil(), slow_police(3)`: "You dump oil behind you; the closest cruiser fishtails and falls back."
+  - The police commander's mind held back early: "Early stage, stay fair, hold distance to observe."
+
+**Fixed: "ready" came too early.**
+- **The problem:** the kit reported a game as ready after 30 frames, about half a second in, while its sky, models and people were still downloading.
+  - The tester's first screenshot often showed a grey screen.
+  - The reviewer sent games back for it (version 1 of Night Heist Paris and of the NYC chase).
+  - Muse Wonder added hacks such as the stand-in capsules from step 35.
+- **The fix:** a game is now ready 20 frames after its `main(kit)` has finished, or after 20 s at the latest. Until then, players see "Loading the world…" instead of a grey frame.
+- **Measured:**
+  - Night Heist Paris is ready after 8.8 s, and Night Getaway after 10.3 s. Most of that is the 2k sky photo.
+  - The screenshot 1.5 s later shows the whole scene.
+  - The full tester on Night Getaway: ready, no errors, 23 s.
+
+| Night Getaway, made in 1.2 minutes |
+|---|
+| ![Night Getaway](images/night-getaway.png) |
+
 ## Final check
 
 Run these from the project folder to repeat the checks:

@@ -6,8 +6,11 @@ Put your Meta API key in `.env` (`MODEL_API_KEY=…`), run `npm start`, and open
 1. **Muse Wonder writes the whole game as code** from your words: the rules, controls and goal. Nothing is a template.
 2. **It builds a real-looking world:**
    - 466 scanned models, 863 surfaces and 997 photographed skies from Poly Haven (CC0);
-   - 26 realistic people from Microsoft Rocketbox (MIT), who walk, run, crouch, look around, cheer and talk.
-3. **A robot plays it, and Muse Wonder checks the screenshots.** Problems go back to be fixed.
+   - 26 realistic people from Microsoft Rocketbox (MIT), who walk, run, crouch, look around, cheer and talk;
+   - walls and buildings in real brick, plaster, concrete and wood, each at its real size;
+   - real light at night: street lamps, lanterns, torches and headlights, with dim moonlight between them;
+   - road cars built in code to real size (sedan, taxi, police car and SUV), with working headlights and a flashing police light bar.
+3. **A robot plays it, and Muse Wonder checks the screenshots.** Problems go back to be fixed, including a round that ends unfairly in its first seconds.
 4. **Meta's AI runs inside the game.**
    - Press **Enter** and try anything: Muse Spark, as the world model, decides what happens.
    - Guards and rivals have minds of their own.
@@ -16,6 +19,10 @@ Put your Meta API key in `.env` (`MODEL_API_KEY=…`), run `npm start`, and open
 | The studio | Making it, live | Night Heist Paris | Meta's AI at work |
 |---|---|---|---|
 | ![The studio](docs/images/final-studio.png) | ![Making the game](docs/images/final-making.png) | ![Night Heist Paris](docs/images/final-heist-playing.png) | ![The world model and the guards' minds](docs/images/final-heist-ai.png) |
+
+| Night Getaway (made in 1.2 minutes) | Night Chase NYC | Road cars and lamps at night |
+|---|---|---|
+| ![Night Getaway](docs/images/night-getaway.png) | ![Night Chase NYC](docs/images/nyc-night-chase.png) | ![Road cars at night](docs/images/cars-night.png) |
 
 **The final test (Nov 4), made and played through the page:** "A night heist in a Paris museum: I steal a golden statue while two security guards patrol with flashlights, and escape through the back door."
 - **It took 3 versions, 3.2 minutes and $0.78.** The reviewer caught a blank grey screen at the start of version 1, and it was fixed.
