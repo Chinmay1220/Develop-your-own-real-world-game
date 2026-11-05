@@ -37,6 +37,7 @@ Every result below comes from a real run. Nothing is invented.
 | [28](#step-28-real-scanned-models-surfaces-and-skies-in-every-game-poly-haven) | Real scanned models, surfaces and skies in every game (Poly Haven) |
 | [29](#step-29-real-people-in-every-game-microsoft-rocketbox) | Real people in every game (Microsoft Rocketbox) |
 | [30](#step-30-a-new-studio-page-designed-with-react-bits-fancy-components-and-cobe) | A new studio page, designed with React Bits, Fancy Components and COBE |
+| [31](#step-31-the-final-product-a-game-made-and-played-through-the-new-studio) | The final product: a game made and played through the new studio |
 | [Final](#final-check) | Final check, and how to repeat it |
 | [Next](#not-done-yet) | Not done yet |
 
@@ -1313,6 +1314,40 @@ Fixed along the way:
 | Hero | How it works | The gallery | Playing, with Meta's AI beside the game |
 |---|---|---|---|
 | ![Hero](images/studio-hero.png) | ![Steps](images/studio-how.png) | ![Gallery](images/studio-gallery.png) | ![Playing](images/studio-player.png) |
+
+## Step 31: The final product: a game made and played through the new studio
+
+**The test:** the whole product, used as a person would in a headless browser.
+1. Open `make.html` and click the "Paris museum heist" example.
+2. Press "Make my game", and watch the live making view.
+3. Play the game it opens, and press Enter to try the game's own example line.
+
+**Result:**
+- **"Night Heist Paris", in 3 versions, 3.2 minutes and $0.78:**
+  - **Version 1** ran, but the reviewer saw "a blank grey screen at game start", which was sent back.
+  - **Version 3** passed.
+  - **The making view's stages lit up in order:** writing at 9 s, testing at 66 s, ready at 193 s.
+- **What Muse Wonder used:**
+  - the real people `Security_Male_01` and `Security_Female_01` as the guards Marc and Léa, with minds;
+  - Poly Haven's `courtyard_night` sky, `terrazzo_tiles` floor and `plastered_wall` walls;
+  - the `marble_bust_01`, `antique_ceramic_vase_01`, `brass_vase_01` and `treasure_chest` models;
+  - 12 world changes (noise, lights and more).
+- **In play:**
+  - "make a noise in the east gallery" became `make_noise(east gallery)`: "You hurl a coin into the east gallery. It clatters loudly off the marble floor."
+  - Both guards then investigated: Marc said "Who's there? Show yourself!" and Léa "J'entends quelque chose, j'y vais !".
+  - The test's blind forward walk then got caught by a flashlight, and the round ended.
+
+**Fixed after the run:**
+
+| Problem | Fix |
+|---|---|
+| "Meta's AI is learning from this round…" overlapped "Press R to try again" when the end message wrapped onto two lines. | The note sits near the bottom now. |
+| The player was the stylised mannequin (the "thief" look) even though real people were offered. | The writer is now told real people are for every human, the player's own character included, picked by what they wear. |
+| The gallery's "Real people" badge missed games that pick a person's look through a variable. | It now looks for any Rocketbox name in the code. |
+
+| Making it, live | Playing | Meta's AI at work | The gallery |
+|---|---|---|---|
+| ![Making](images/final-making.png) | ![Playing](images/final-heist-playing.png) | ![AI](images/final-heist-ai.png) | ![Gallery](images/final-gallery.png) |
 
 ## Final check
 

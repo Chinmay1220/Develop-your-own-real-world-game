@@ -46,7 +46,8 @@ export interface Features {
 export function featuresOf(code: string, id: string): Features {
   return {
     world: /kit\.(world|mind)\(/.test(code),
-    people: /kit\.character\(\s*["'`](?:[A-Z][a-z]+_){1,2}(?:Male|Female|Adult|Child)?_?\d\d/.test(code),
+    // A Rocketbox name anywhere in the code, such as "Security_Male_01" or "Female_Adult_05".
+    people: /["'`](?:[A-Z][a-z]+_(?:Male|Female)|(?:Male|Female)_(?:Adult|Child))_\d\d["'`]/.test(code),
     scanned: /["'`]polyhaven\//.test(code),
     shot: existsSync(join(GAMES_DIR, `${id}.png`)),
   };

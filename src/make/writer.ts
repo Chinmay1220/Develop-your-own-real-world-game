@@ -136,7 +136,7 @@ ${scannedModels || "  (none installed)"}
 - kit.remove(object) takes something out of the game.
 Characters:
 - kit.character(look, { at, color: "#rrggbb", scale, turn }): an animated person or creature.
-${peopleList ? `  - Real people, realistic and real size: use them for every human, unless the game is a cartoon or needs a robot, ghost or creature. ${peopleList}.\n  - They show a moment after the game starts (they load from the server), and also have the animations "crouch", "look" (looking around), "cheer" and "talk". c.speeds.walk and c.speeds.run (metres per second) match their feet: move them at those speeds, or call c.play("run", speed / c.speeds.run) to fit a faster run.\n  - Other looks, stylised: ${looks}.` : `  - Looks: ${looks}.`}
+${peopleList ? `  - Real people, realistic and real size: use them for every human, the player's own character included, unless the game is a cartoon or needs a robot, ghost or creature. Pick by what they wear (a thief or spy can be someone in dark or plain clothes). ${peopleList}.\n  - They show a moment after the game starts (they load from the server), and also have the animations "crouch", "look" (looking around), "cheer" and "talk". c.speeds.walk and c.speeds.run (metres per second) match their feet: move them at those speeds, or call c.play("run", speed / c.speeds.run) to fit a faster run.\n  - Other looks, stylised: ${looks}.` : `  - Looks: ${looks}.`}
 - It returns c: move and turn c.root (a THREE.Group) yourself, and call c.play("idle" | "walk" | "run") to match. c.face(x, z) turns it toward a point; c.height is its height.
 - A character faces +z when its root.rotation.y is 0, so moving forward is position += (sin(rotation.y), 0, cos(rotation.y)) × speed × dt.
 Camera:

@@ -1,4 +1,40 @@
-# Rewind
+# Speak Any Game
+
+**Say any game. Meta's AI writes it, fills it with a real scanned world and real people, and runs it while you play.**
+
+Put your Meta API key in `.env` (`MODEL_API_KEY=…`), run `npm start`, and open **http://localhost:3000/make.html**. Say or type an idea, or pick one of the example worlds.
+1. **Muse Wonder writes the whole game as code** from your words: the rules, controls and goal. Nothing is a template.
+2. **It builds a real-looking world:**
+   - 466 scanned models, 863 surfaces and 997 photographed skies from Poly Haven (CC0);
+   - 26 realistic people from Microsoft Rocketbox (MIT), who walk, run, crouch, look around, cheer and talk.
+3. **A robot plays it, and Muse Wonder checks the screenshots.** Problems go back to be fixed.
+4. **Meta's AI runs inside the game.**
+   - Press **Enter** and try anything: Muse Spark, as the world model, decides what happens.
+   - Guards and rivals have minds of their own.
+   - After each round, Muse Wonder teaches them your tricks.
+
+| The studio | Making it, live | Night Heist Paris | Meta's AI at work |
+|---|---|---|---|
+| ![The studio](docs/images/final-studio.png) | ![Making the game](docs/images/final-making.png) | ![Night Heist Paris](docs/images/final-heist-playing.png) | ![The world model and the guards' minds](docs/images/final-heist-ai.png) |
+
+**The final test (Nov 4), made and played through the page:** "A night heist in a Paris museum: I steal a golden statue while two security guards patrol with flashlights, and escape through the back door."
+- **It took 3 versions, 3.2 minutes and $0.78.** The reviewer caught a blank grey screen at the start of version 1, and it was fixed.
+- **What it built:**
+  - two Rocketbox security guards, Marc and Léa, each with a mind;
+  - a Poly Haven night sky, terrazzo floor and plaster walls;
+  - a marble bust, vases and a treasure chest;
+  - a golden idol to steal.
+- **Asked "make a noise in the east gallery",** the world model threw a coin that clattered off the marble floor. Both guards went to look: "Who's there? Show yourself!" and "J'entends quelque chose, j'y vais !" ("I hear something, I'm going!").
+
+**The studio page's design** ports components from React Bits (Aurora, Spotlight Card, Shiny Text) and Fancy Components (Text Rotate), and uses COBE for the globe. See [the notices](public/design/THIRD_PARTY.md).
+
+Built for the Meta Global AI Developer Hackathon (Oct 26 – Nov 4, 2026). Track: Indie. Theme: Push the Frontier.
+
+---
+
+## Also in this repo
+
+### Rewind: a world model that runs time backwards
 
 **A world model that runs time backwards.**
 
@@ -8,8 +44,6 @@ Show Rewind one photo of an aftermath, such as a car against a guardrail, a brok
 3. **It paints the moments before, in the same real place.** Muse Image changes the photo itself, going backwards: 1 second before, then 3, then 10. Anything made later, like tyre marks or dents, isn't there yet. Press **Play** to watch it happen, ending on the real photo.
 
 World models usually predict the future. Rewind runs one backwards, from effect to cause, with its reasoning shown and painted. Uses include accident and insurance reports, safety lessons, and everyday mysteries ("what broke the vase?").
-
-Built for the Meta Global AI Developer Hackathon (Oct 26 – Nov 4, 2026). Track: Indie. Theme: Push the Frontier.
 
 | Give it a photo | The evidence and the explanations | 10 seconds before | 1 second before |
 |---|---|---|---|
@@ -89,7 +123,10 @@ Start the server, then open **http://localhost:3000/make.html**. Say or type any
 - **Meta's Muse Wonder writes the whole game as code:** its rules, controls, levels, and how you win or lose. It uses our game kit: 3D worlds, animated people and creatures, ready-made things, cameras, sound and a score display.
 - **A hidden test browser plays it.** Any errors go back to be fixed.
 - **A reviewer checks the screenshots.** Muse Wonder looks at them and sends back anything that looks wrong, such as a missing track, to be fixed.
-- **Real graphics:** a real sky, reflections and glossy paint, and real 3D models by artists. So far that's Kenney's CC0 Racing Kit: F1 cars, grandstands, barriers and more.
+- **Real graphics:** real photographed skies, real scanned objects and surfaces, and realistic people.
+  - **Poly Haven (CC0):** 466 scanned models, 863 surfaces and 997 skies, loaded from its servers.
+  - **Microsoft Rocketbox (MIT):** 26 people (police, guards, soldiers, doctors, chefs, children and more) that walk, run, crouch, look around, cheer and talk.
+  - **Also:** Kenney's CC0 Racing Kit and a detailed F1 car.
 - **You play it on the page,** in a sealed frame that can't reach your files or the API key.
 
 First test: three very different ideas each became a working game in about a minute, on the first try, for $0.10–0.16 each.

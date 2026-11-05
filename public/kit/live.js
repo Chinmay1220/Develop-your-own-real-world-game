@@ -111,7 +111,7 @@ export function createLive({ report, scene, THREE, label, setPaused, clearKeys, 
     #live-lessons { left: 50%; top: 56px; transform: translateX(-50%); width: min(560px, 86vw); padding: 12px 16px; border-radius: 14px; background: rgba(8, 12, 20, .82); font-size: 14px; line-height: 1.45; transition: opacity 1.2s; }
     #live-lessons b { color: #f5b942; }
     #live-lessons li { margin-top: 3px; }
-    #live-learning { left: 50%; top: calc(50% + 70px); transform: translateX(-50%); width: min(620px, 86vw); text-align: center; font-size: 17px; font-weight: 600; line-height: 1.4; }`;
+    #live-learning { left: 50%; bottom: 96px; transform: translateX(-50%); width: min(620px, 86vw); text-align: center; font-size: 17px; font-weight: 600; line-height: 1.4; }`;
   document.head.append(style);
   const element = (id, tag = "div") => Object.assign(document.body.appendChild(document.createElement(tag)), { id, className: "live" });
   const feedBox = element("live-feed");
